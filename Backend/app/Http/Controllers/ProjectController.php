@@ -14,7 +14,7 @@ class ProjectController extends Controller
 
 
         $project->src = generateFullImageUrl($project->src);
-        $project->description = translate($project->description);
+        $project->text = translate($project->text);
         $project->title = translate($project->title);
         $project->client = translate($project->client);
         $project->location = translate($project->location);
@@ -29,7 +29,7 @@ class ProjectController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required',
+            'text' => 'required',
             'date' => 'required|date',
             'client' => 'required|string',
             'location' => 'required|string',
@@ -38,25 +38,40 @@ class ProjectController extends Controller
         ]);
 
 
-        $project = Project::create($request->except('src'));
 
 
-        if ($request->hasFile('image')) {
+
+
             $image = $request->file('image');
-            $imageName = 'project_' . $project->id . '.' . $image->getClientOriginalExtension();
+            $imageName = 'project_' . time() . '.' . $image->getClientOriginalExtension();
             $imagePath = 'pictures/projects/' . $imageName;
 
 
             $image->storeAs('public/' . $imagePath);
 
 
-            $project->update([
-                'src' => 'storage/' . $imagePath,
+            $imageUrl = 'storage/' . $imagePath;
+
+
+            $project = Project::Create([
+
+
+                'title' => $request->input('title'),
+                'text' => $request->input('text'),
+                'date' => $request->input('date'),
+                'client' => $request->input('client'),
+                'location' => $request->input('location'),
+                'category' => $request->input('category'),
+                'src' => $imageUrl
+
+
+
             ]);
 
 
+
             $project->src = generateFullImageUrl($project->src);
-        }
+
 
         return response()->json($project, 201);
     }
@@ -69,7 +84,7 @@ class ProjectController extends Controller
 
         $request->validate([
             'title' => 'string|max:255',
-            'description' => 'string',
+            'text' => 'string',
             'date' => 'date',
             'client' => 'string',
             'location' => 'string',
@@ -143,7 +158,7 @@ class ProjectController extends Controller
 
         if ($search) {
             $query->where('title', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('text', 'like', "%{$search}%");
         }
 
         $projects = $query->paginate(10);  // Pagination with 10 items per page
@@ -151,7 +166,7 @@ class ProjectController extends Controller
         // Ensure image URLs are returned with the full path
         foreach ($projects as $project) {
             $project->src = generateFullImageUrl($project->src);
-            $project->description = translate($project->description);
+            $project->text = translate($project->text);
             $project->title = translate($project->title);
             $project->client = translate($project->client);
             $project->location = translate($project->location);

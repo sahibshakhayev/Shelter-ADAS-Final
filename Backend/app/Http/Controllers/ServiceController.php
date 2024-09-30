@@ -29,30 +29,41 @@ public function store(Request $request)
 $request->validate([
 'title' => 'required|string|max:255',
 'subtitle' => 'required|string|max:255',
-'content' => 'required|string',
+'text-title' => 'required|string',
+    'description' => 'required|string',
 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validate image file
 ]);
 
 // Create a new Service entry (without the 'image' at first)
-$service = Service::create($request->except('image'));
+
 
 // Handle image upload
-if ($request->hasFile('image')) {
+
 $image = $request->file('image');
-$imageName = 'service_' . $service->id . '.' . $image->getClientOriginalExtension();
+$imageName = 'service_' . time() . '.' . $image->getClientOriginalExtension();
 $imagePath = 'pictures/services/' . $imageName;
 
 // Store the image in the public disk
 $image->storeAs('public/' . $imagePath);
 
 // Update the Service entry with the full image URL
-$service->update([
-'image' => 'storage/' . $imagePath,
-]);
 
+
+    $imageUrl = 'storage/' . $imagePath;
+
+
+    $service = Service::Create([
+
+
+        'title' => $request->input('title'),
+        'subtitle' => $request->input('subtitle'),
+        'text-title' => $request->input('text-title'),
+        'description' => $request->input('description'),
+        'src' => $imageUrl
+        ]);
 
 $service->src = request()->getSchemeAndHttpHost() . '/' . $service->src;
-}
+
 
 return response()->json($service, 201);
 }
@@ -66,7 +77,8 @@ $service = Service::findOrFail($id);
 $request->validate([
 'title' => 'sometimes|string|max:255',
 'subtitle' => 'sometimes|string|max:255',
-'content' => 'sometimes|string',
+'text-title' => 'sometimes|string',
+    'description' => 'sometimes|string',
 'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',  // Optional image file
 ]);
 
@@ -122,7 +134,7 @@ $query = Service::query();
 if ($search) {
 $query->where('title', 'like', "%{$search}%")
 ->orWhere('subtitle', 'like', "%{$search}%")
-->orWhere('content', 'like', "%{$search}%");
+->orWhere('description', 'like', "%{$search}%");
 }
 
 $services = $query->paginate(4);
@@ -134,5 +146,23 @@ $service->src = request()->getSchemeAndHttpHost() . '/' . $service->src;
 
 return response()->json($services);
 }
+
+
+
+public function destroy($id)
+{
+    $service = Service::findOrFail($id);
+
+    // Delete the image from storage if it exists
+    if (Storage::exists('public/' . $service->src)) {
+        Storage::delete('public/' . $service->src);
+    }
+
+    $service->delete();
+
+    return response()->json(null, 204);  // HTTP 204 No Content
+}
+
+
 }
 

@@ -11,7 +11,7 @@ export const ProjectList = props => (
         <Datagrid>
             <TextField source="id" />
             <TextField source="title" />
-            <TextField source="description" />
+            <TextField source="text" />
             <TextField source="client" />
             <TextField source="location" />
             <TextField source="category" />
@@ -28,7 +28,7 @@ export const ProjectEdit = props => (
     <Edit {...props}>
         <SimpleForm>
             <TextInput source="title" />
-            <TextInput source="description" />
+            <TextInput source="text"  multiline />
             <TextInput source="client" />
             <TextInput source="location" />
             <TextInput source="category" />
@@ -45,7 +45,7 @@ export const ProjectCreate = props => (
     <Create {...props}>
         <SimpleForm>
             <TextInput source="title" />
-            <TextInput source="description" />
+            <TextInput source="text"  multiline />
             <TextInput source="client" />
             <TextInput source="location" />
             <TextInput source="category" />

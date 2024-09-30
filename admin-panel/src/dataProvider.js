@@ -411,14 +411,18 @@ const myDataProvider = {
             const formData = new FormData();
             formData.append('title', params.data.title);
             formData.append('subtitle', params.data.subtitle);
-            formData.append('content', params.data.content);
+            formData.append('subtitle', params.data.subtitle);
+            formData.append('text-title', params.data['text-title']);
+            formData.append('description', params.data.description);
 
             if (params.data.image && params.data.image.rawFile) {
                 formData.append('image', params.data.image.rawFile);  // Handle image file
             }
 
+            formData.append('_method', 'PUT');
+
             return httpClient(`${apiUrl}/admin/services/${params.id}`, {
-                method: 'PUT',
+                method: 'POST',
                 body: formData,
             }).then(({ json }) => ({
                 data: json,
@@ -428,7 +432,7 @@ const myDataProvider = {
         if (resource === 'projects') {
             const formData = new FormData();
             formData.append('title', params.data.title);
-            formData.append('description', params.data.description);
+            formData.append('text', params.data.text);
             formData.append('date', params.data.date);
             formData.append('client', params.data.client);
             formData.append('location', params.data.location);
@@ -438,7 +442,7 @@ const myDataProvider = {
                 formData.append('image', params.data.image.rawFile);  // Handle image file
             }
 
-            formData.append('_method', "PUT");
+            formData.append('_method', 'PUT');
 
             return httpClient(`${apiUrl}/admin/projects/${params.id}`, {
                 method: 'POST',
@@ -530,7 +534,7 @@ const myDataProvider = {
         if (resource === 'projects') {
             const formData = new FormData();
             formData.append('title', params.data.title);
-            formData.append('description', params.data.description);
+            formData.append('text', params.data.text);
             formData.append('date', params.data.date);
             formData.append('client', params.data.client);
             formData.append('location', params.data.location);
@@ -539,6 +543,7 @@ const myDataProvider = {
             if (params.data.image && params.data.image.rawFile) {
                 formData.append('image', params.data.image.rawFile);  // Handle image file
             }
+
 
             return httpClient(`${apiUrl}/admin/projects`, {
                 method: 'POST',
@@ -570,8 +575,8 @@ const myDataProvider = {
             const formData = new FormData();
             formData.append('title', params.data.title);
             formData.append('subtitle', params.data.subtitle);
-            formData.append('content', params.data.content);
-
+            formData.append('text-title', params.data['text-title']);
+            formData.append('description', params.data.description);
             if (params.data.image && params.data.image.rawFile) {
                 formData.append('image', params.data.image.rawFile);  // Handle image file
             }
@@ -755,6 +760,14 @@ const myDataProvider = {
 
         if (resource === 'projects') {
             return httpClient(`${apiUrl}/admin/projects/${params.id}`, {
+                method: 'DELETE',
+            }).then(({ json }) => ({
+                data: json,
+            }));
+        }
+
+        if (resource === 'services') {
+            return httpClient(`${apiUrl}/admin/services/${params.id}`, {
                 method: 'DELETE',
             }).then(({ json }) => ({
                 data: json,

@@ -25,8 +25,8 @@ export const AboutUsEdit = (props) => (
         <SimpleForm>
             {/* Basic About Us information */}
             <TextInput source="header_text" label="Header Text" fullWidth />
-            <TextInput source="short_description" label="Short Description" fullWidth />
-            <TextInput source="long_description" label="Long Description" fullWidth multiline />
+            <TextInput source="short_description"  multiline label="Short Description" fullWidth />
+            <TextInput source="long_description"   multiline label="Long Description" fullWidth multiline />
             <TextInput source="image_alt" label="Image Alt Text" />
             <ImageField source="left_image"/>
             <ImageInput source="image" label="Upload Image" accept="image/*">

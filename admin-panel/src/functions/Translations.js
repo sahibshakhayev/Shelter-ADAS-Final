@@ -43,8 +43,8 @@ export const TranslationList = (props) => {
 export const TranslationEdit = (props) => (
     <Edit {...props}>
         <SimpleForm>
-            <TextInput source="key" />
-            <TextInput source="value" />
+            <TextInput source="key" multiline />
+            <TextInput source="value" multiline />
             <ReferenceInput source="language_id" label="Language"  choices={props.languages} reference="languages" />
         </SimpleForm>
     </Edit>
@@ -54,8 +54,8 @@ export const TranslationEdit = (props) => (
 export const TranslationCreate = (props) => (
     <Create {...props}>
         <SimpleForm>
-            <TextInput source="key" />
-            <TextInput source="value" />
+            <TextInput source="key" multiline />
+            <TextInput source="value" multiline />
             <ReferenceInput source="language_id" label="Language"  choices={props.languages} reference="languages" />
         </SimpleForm>
     </Create>

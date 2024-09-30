@@ -27,7 +27,7 @@ export const StaticTextEdit = () => (
     <Edit>
         <SimpleForm>
             <TextInput source="key" />
-            <TextInput source="text" />
+            <TextInput source="text"  multiline/>
         </SimpleForm>
     </Edit>
 );
@@ -37,7 +37,7 @@ export const StaticTextCreate = () => (
     <Create>
         <SimpleForm>
             <TextInput source="key" />
-            <TextInput source="text" />
+            <TextInput source="text" multiline />
         </SimpleForm>
     </Create>
 );
