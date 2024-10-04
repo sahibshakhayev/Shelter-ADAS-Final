@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('client');
             $table->string('location');
             $table->string('category');
-            $table->string('text');
+            $table->text('text');
             $table->timestamps();
         });
     }

@@ -127,6 +127,8 @@ Route::middleware([IsAdmin::class])->group(function () {
 
 
 
+
+
     // Services CRUD
     Route::post('/admin/services', [ServiceController::class, 'store']);
     Route::put('/admin/services/{id}', [ServiceController::class, 'update']);
@@ -144,8 +146,13 @@ Route::middleware([IsAdmin::class])->group(function () {
 
 
     Route::post('/admin/about-us/{aboutUsId}/subbrands', [AboutUsController::class, 'subbrandStore']);
-    Route::put('/admin/about-us/{aboutUsId}/subbrands/{subbrandId}', [AboutUsController::class, 'subbrandUpdate']);
-    Route::delete('/admin/about-us/{aboutUsId}/subbrands/{subbrandId}', [AboutUsController::class, 'subbrandDestroy']);
+    Route::put('/admin/about-us/subbrand/{id}', [AboutUsController::class, 'subbrandUpdate']);
+    Route::delete('/admin/about-us/subbrand/{id}', [AboutUsController::class, 'destroySubbrand']);
+
+
+    Route::post('/admin/about-us/{aboutUsId}/brandValues', [AboutUsController::class, 'brandValueStore']);
+    Route::put('/admin/about-us/brandValue/{id}', [AboutUsController::class, 'brandValueUpdate']);
+    Route::delete('/admin/about-us/brandValue/{id}', [AboutUsController::class, 'brandValueDestroy']);
 
 // Brand values routes
     Route::post('/admin/about-us/{aboutUsId}/brand-values', [AboutUsController::class, 'brandValueStore']);

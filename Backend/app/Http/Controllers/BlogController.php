@@ -27,6 +27,7 @@ class BlogController extends Controller
         // Ensure image URLs are returned with the full path
         foreach ($blogs as $blog) {
             $blog->image = generateFullImageUrl($blog->image);
+            $blog->article_image = generateFullImageUrl($blog->article_image);
             $blog->title = translate($blog->title);
             $blog->subtitle = translate($blog->subtitle);
             $blog->content = translate($blog->content);
@@ -40,52 +41,50 @@ class BlogController extends Controller
     {
         $blog = Blog::findOrFail($id);
 
-        // Return the full image URL
-        $blog->image = generateFullImageUrl($blog->image);
-        $blog->title = translate($blog->title);
-        $blog->subtitle = translate($blog->subtitle);
-        $blog->content = translate($blog->content);
+        $blog->image = request()->getSchemeAndHttpHost() . '/' . $blog->image;
+        $blog->article_image = $blog->article_image ? request()->getSchemeAndHttpHost() . '/' . $blog->article_image : null;
+
         return response()->json($blog);
     }
+
 
     // Method to create a new blog with image upload (POST)
     public function store(Request $request)
     {
-        // Validate the incoming data
         $request->validate([
             'title' => 'required|string|max:255',
             'subtitle' => 'required|string|max:255',
             'content' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',  // Ensure image is uploaded
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'article_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
-        // Handle image upload first
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
+        $image = $request->file('image');
+        $imageName = 'blog_' . time() . '.' . $image->getClientOriginalExtension();
+        $imagePath = 'pictures/blogs/' . $imageName;
+        $image->storeAs('public/' . $imagePath);
+        $imageUrl = 'storage/' . $imagePath;
 
-            // Generate a unique image name
-            $imageName = 'blog_' . time() . '.' . $image->getClientOriginalExtension();  // Name image with timestamp to avoid conflicts
-            $imagePath = 'pictures/blogs/' . $imageName;  // Store image in 'pictures/blogs' folder
-
-            // Store the image in the 'public' disk
-            $image->storeAs('public/' . $imagePath);
-
-            // Full image URL (adjust to your environment)
-            $imageUrl = 'storage/' . $imagePath;
+        $articleImageUrl = null;
+        if ($request->hasFile('article_image')) {
+            $articleImage = $request->file('article_image');
+            $articleImageName = 'article_' . time() . '.' . $articleImage->getClientOriginalExtension();
+            $articleImagePath = 'pictures/blogs/articles/' . $articleImageName;
+            $articleImage->storeAs('public/' . $articleImagePath);
+            $articleImageUrl = 'storage/' . $articleImagePath;
         }
 
-        // Now that the image has been uploaded, create the blog entry with the image URL
         $blog = Blog::create([
             'title' => $request->input('title'),
             'subtitle' => $request->input('subtitle'),
             'content' => $request->input('content'),
-            'image' => $imageUrl,  // Assign the image URL from the uploaded file
+            'image' => $imageUrl,
+            'article_image' => $articleImageUrl,
         ]);
 
-        // Ensure the full URL is returned
-        $blog->image = generateFullImageUrl($blog->image);
+        $blog->image = request()->getSchemeAndHttpHost() . '/' . $blog->image;
+        $blog->article_image = $articleImageUrl ? request()->getSchemeAndHttpHost() . '/' . $blog->article_image : null;
 
-        // Return the created blog entry with HTTP 201 status
         return response()->json($blog, 201);
     }
 
@@ -93,65 +92,54 @@ class BlogController extends Controller
 
 
 
+
     public function update(Request $request, $id)
     {
-        Log::info($request->all()); // Log incoming request data
-
         $blog = Blog::findOrFail($id);
-        Log::info($request->method());
 
-
-        // Validate incoming request
         $request->validate([
             'title' => 'sometimes|string|max:255',
             'subtitle' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
-            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg',
+            'article_image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
+        $blog->update($request->except(['image', 'article_image']));
 
-
-        Log::info($request->all());
-
-
-        // Log the values that will be updated
-        Log::info('Updating blog with values:', $request->except('image'));
-
-
-
-
-        // Update blog excluding the image
-        $blog->update($request->except('image'));
-
-        // Handle image update
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = 'blog_' . $blog->id . '.' . $image->getClientOriginalExtension();
             $imagePath = 'pictures/blogs/' . $imageName;
 
-            // Delete old image if it exists
             if (Storage::exists('public/' . $blog->image)) {
                 Storage::delete('public/' . $blog->image);
             }
 
-            // Store new image
             $image->storeAs('public/' . $imagePath);
-
-            // Update image path
             $blog->update(['image' => 'storage/' . $imagePath]);
         }
 
-        // Reload blog to get the updated values from the database
-        $blog->refresh();
+        if ($request->hasFile('article_image')) {
+            $articleImage = $request->file('article_image');
+            $articleImageName = 'article_' . $blog->id . '.' . $articleImage->getClientOriginalExtension();
+            $articleImagePath = 'pictures/blogs/articles/' . $articleImageName;
 
-        // Log updated blog details
-        Log::info('Updated blog:', $blog->toArray());
+            if (Storage::exists('public/' . $blog->article_image)) {
+                Storage::delete('public/' . $blog->article_image);
+            }
 
-        // Return the full image URL
-        $blog->image = generateFullImageUrl($blog->image);
+            $articleImage->storeAs('public/' . $articleImagePath);
+            $blog->update(['article_image' => 'storage/' . $articleImagePath]);
+        }
+
+        $blog->image = request()->getSchemeAndHttpHost() . '/' . $blog->image;
+        $blog->article_image = $blog->article_image ? request()->getSchemeAndHttpHost() . '/' . $blog->article_image : null;
 
         return response()->json($blog, 200);
     }
+
+
 
 
 
@@ -166,6 +154,10 @@ class BlogController extends Controller
             Storage::delete('public/' . $blog->image);
         }
 
+
+        if (Storage::exists('public/' . $blog->article_image)) {
+            Storage::delete('public/' . $blog->article_image);
+        }
         // Delete the Blog record
         $blog->delete();
 

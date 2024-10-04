@@ -9,7 +9,7 @@ class AboutUs extends Model
     protected $table = 'about_us';
 
 
-    protected $fillable = ['header_text', 'short_description', 'long_description','image_alt', 'image'];
+    protected $fillable = ['header_text', 'short_description', 'long_description','image_alt', 'left_image'];
     // Relationship with BrandValues
     public function brandValues()
     {

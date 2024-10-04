@@ -12,21 +12,16 @@ class ProjectController extends Controller
     {
         $project = Project::findOrFail($id);
 
-
-        $project->src = generateFullImageUrl($project->src);
-        $project->text = translate($project->text);
-        $project->title = translate($project->title);
-        $project->client = translate($project->client);
-        $project->location = translate($project->location);
-        $project->category = translate($project->category);
+        $project->src = request()->getSchemeAndHttpHost() . '/' . $project->src;
+        $project->article_image = $project->article_image ? request()->getSchemeAndHttpHost() . '/' . $project->article_image : null;
 
         return response()->json($project);
     }
 
 
+
     public function store(Request $request)
     {
-
         $request->validate([
             'title' => 'required|string|max:255',
             'text' => 'required',
@@ -35,91 +30,94 @@ class ProjectController extends Controller
             'location' => 'required|string',
             'category' => 'required|string',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'article_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
+        $image = $request->file('image');
+        $imageName = 'project_' . time() . '.' . $image->getClientOriginalExtension();
+        $imagePath = 'pictures/projects/' . $imageName;
+        $image->storeAs('public/' . $imagePath);
+        $imageUrl = 'storage/' . $imagePath;
 
+        // Handle article image upload
+        $articleImageUrl = null;
+        if ($request->hasFile('article_image')) {
+            $articleImage = $request->file('article_image');
+            $articleImageName = 'article_' . time() . '.' . $articleImage->getClientOriginalExtension();
+            $articleImagePath = 'pictures/projects/articles/' . $articleImageName;
+            $articleImage->storeAs('public/' . $articleImagePath);
+            $articleImageUrl = 'storage/' . $articleImagePath;
+        }
 
+        // Create a new project
+        $project = Project::create([
+            'title' => $request->input('title'),
+            'text' => $request->input('text'),
+            'date' => $request->input('date'),
+            'client' => $request->input('client'),
+            'location' => $request->input('location'),
+            'category' => $request->input('category'),
+            'src' => $imageUrl,
+            'article_image' => $articleImageUrl,
+        ]);
 
-
-
-            $image = $request->file('image');
-            $imageName = 'project_' . time() . '.' . $image->getClientOriginalExtension();
-            $imagePath = 'pictures/projects/' . $imageName;
-
-
-            $image->storeAs('public/' . $imagePath);
-
-
-            $imageUrl = 'storage/' . $imagePath;
-
-
-            $project = Project::Create([
-
-
-                'title' => $request->input('title'),
-                'text' => $request->input('text'),
-                'date' => $request->input('date'),
-                'client' => $request->input('client'),
-                'location' => $request->input('location'),
-                'category' => $request->input('category'),
-                'src' => $imageUrl
-
-
-
-            ]);
-
-
-
-            $project->src = generateFullImageUrl($project->src);
-
+        $project->src = request()->getSchemeAndHttpHost() . '/' . $project->src;
+        $project->article_image = $articleImageUrl ? request()->getSchemeAndHttpHost() . '/' . $project->article_image : null;
 
         return response()->json($project, 201);
     }
+
 
 
     public function update(Request $request, $id)
     {
         $project = Project::findOrFail($id);
 
-
         $request->validate([
-            'title' => 'string|max:255',
-            'text' => 'string',
-            'date' => 'date',
-            'client' => 'string',
-            'location' => 'string',
-            'category' => 'string',
+            'title' => 'sometimes|string|max:255',
+            'text' => 'sometimes',
+            'date' => 'sometimes|date',
+            'client' => 'sometimes|string',
+            'location' => 'sometimes|string',
+            'category' => 'sometimes|string',
             'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'article_image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-
-        $project->update($request->except('src'));
-
+        $project->update($request->except(['image', 'article_image']));
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = 'project_' . $project->id . '.' . $image->getClientOriginalExtension();
             $imagePath = 'pictures/projects/' . $imageName;
 
-
             if (Storage::exists('public/' . $project->src)) {
                 Storage::delete('public/' . $project->src);
             }
 
-
             $image->storeAs('public/' . $imagePath);
-
-
-            $project->update([
-                'src' => 'storage/' . $imagePath,
-            ]);
+            $project->update(['src' => 'storage/' . $imagePath]);
         }
 
-        // Return the full image URL
-        $project->src = generateFullImageUrl($project->src);
+        if ($request->hasFile('article_image')) {
+            $articleImage = $request->file('article_image');
+            $articleImageName = 'article_' . $project->id . '.' . $articleImage->getClientOriginalExtension();
+            $articleImagePath = 'pictures/projects/articles/' . $articleImageName;
 
-        return response()->json($project, 200);  // HTTP 200 OK
+            if (Storage::exists('public/' . $project->article_image)) {
+                Storage::delete('public/' . $project->article_image);
+            }
+
+            $articleImage->storeAs('public/' . $articleImagePath);
+            $project->update(['article_image' => 'storage/' . $articleImagePath]);
+        }
+
+        $project->src = request()->getSchemeAndHttpHost() . '/' . $project->src;
+        $project->article_image = $project->article_image ? request()->getSchemeAndHttpHost() . '/' . $project->article_image : null;
+
+        return response()->json($project, 200);
     }
+
 
     // Delete an existing project (DELETE)
     public function destroy($id)
@@ -130,6 +128,11 @@ class ProjectController extends Controller
         if (Storage::exists('public/' . $project->src)) {
             Storage::delete('public/' . $project->src);
         }
+
+        if (Storage::exists('public/' . $project->article_image)) {
+            Storage::delete('public/' . $project->article_image);
+        }
+
 
         $project->delete();
 
@@ -144,6 +147,7 @@ class ProjectController extends Controller
         // Ensure image URLs are returned with the full path
         foreach ($projects as $project) {
             $project->src = generateFullImageUrl($project->src);
+            $project->article_image = generateFullImageUrl($project->article_image);
         }
 
         return response()->json($projects);
@@ -166,6 +170,7 @@ class ProjectController extends Controller
         // Ensure image URLs are returned with the full path
         foreach ($projects as $project) {
             $project->src = generateFullImageUrl($project->src);
+            $project->article_image = generateFullImageUrl($project->article_image);
             $project->text = translate($project->text);
             $project->title = translate($project->title);
             $project->client = translate($project->client);

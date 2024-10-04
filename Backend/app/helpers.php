@@ -1,5 +1,6 @@
 <?php
 use App\Models\Translation;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\App;
 
 if (!function_exists('translate')) {
@@ -43,10 +44,14 @@ if (!function_exists('uploadImage')) {
         $path = "pictures/{$resourceName}/{$filename}";
 
         // Move the file to the public directory
-        $image->move(public_path("pictures/{$resourceName}"), $filename);
+        $image->storeAs('public/'.$path);
 
         // Return the file path excluding 'public/' and adding 'storage/' instead
         return "storage/{$path}";
     }
+
+
+
+
 }
 
