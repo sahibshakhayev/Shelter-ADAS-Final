@@ -51,15 +51,9 @@ class ContactingController extends Controller
         // Handle image upload
 
             $image = $request->file('image');
-            $imageName = 'contact_' . time() . '.' . $image->getClientOriginalExtension();  // Name as 'contact_id.extension'
-            $imagePath = 'pictures/contactings/' . $imageName;  // Store image in a subfolder
 
-            // Store the image in the public disk
-            $image->storeAs('public/' . $imagePath);
 
-            // Update the Contacting entry with the image path
-
-            $imageUrl = 'storage/' . $imagePath;
+            $imageUrl = uploadImage($image, 'contactings');
 
         $contact =  Contacting::Create([
             'name' => $request->input('name'),
@@ -92,8 +86,6 @@ class ContactingController extends Controller
         // Handle new image upload (if provided)
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = 'contact_' . $contact->id . '.' . $image->getClientOriginalExtension();
-            $imagePath = 'pictures/contactings/' . $imageName;
 
             // Delete the old image if it exists
             if (Storage::exists('public/' . $contact->src)) {
@@ -101,11 +93,11 @@ class ContactingController extends Controller
             }
 
             // Store the new image
-            $image->storeAs('public/' . $imagePath);
+
 
             // Update the Contacting entry with the new image path
             $contact->update([
-                'src' => 'storage/' . $imagePath,
+                'src' => uploadImage($image,'contactings')
             ]);
         }
 

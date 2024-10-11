@@ -22,8 +22,19 @@ class StaticController extends Controller
 
         }
 
+        $data = $data->get();
+
+
+        foreach ($data as $statictext) {
+
+          $statictext->text = translate($statictext->text);
+
+
+        }
+
+
         return response()->json([
-            'data' => $data->get(),
+            'data' => $data,
             'total' => $data->count()
         ]);
     }

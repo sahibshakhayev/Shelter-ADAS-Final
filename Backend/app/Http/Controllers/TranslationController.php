@@ -15,16 +15,22 @@ class TranslationController extends Controller
     public function getTranslations(Request $request)
     {
         // Optionally filter by language (code)
+
+        $search = $request->input('search', null);
         $languageCode = $request->query('lang_id', null);
 
         // If a language is selected, filter translations by that language
         if ($languageCode) {
-            $translations = Translation::whereHas('language', function ($query) use ($languageCode) {
+            $translations = Translation::where(function($query) use ($search) {
+                $query->where('key', 'LIKE', "%{$search}%")
+                    ->orWhere('value', 'LIKE', "%{$search}%");
+            })->whereHas('language', function ($query) use ($languageCode) {
                 $query->where('id', $languageCode);
-            })->paginate(10); // Pagination with 10 items per page
+            })->paginate(10);
+
         } else {
             // Return all translations with pagination
-            $translations = Translation::paginate(10);
+            $translations = Translation::Where('key', 'LIKE', "%{$search}%")->OrWhere('value', 'LIKE', "%{$search}%")->paginate(10);
         }
 
         return response()->json($translations);

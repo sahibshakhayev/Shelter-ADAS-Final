@@ -35,15 +35,9 @@ class PartnerController extends Controller
 
         // Handle image upload
             $image = $request->file('logo');
-            $imageName = 'partner_' . time() . '.' . $image->getClientOriginalExtension();
-            $imagePath = 'pictures/partners/' . $imageName;
 
-            // Store the image in the public disk
-            $image->storeAs('public/' . $imagePath);
 
-            // Update the Partner entry with the image path
-
-        $imageUrl = 'storage/' . $imagePath;
+        $imageUrl = uploadImage($image, 'partners');
 
         $partner =  Partner::Create([
             'alt_text' => $request->input('alt_text'),
@@ -77,8 +71,6 @@ class PartnerController extends Controller
         // Handle new logo upload (if provided)
         if ($request->hasFile('logo')) {
             $image = $request->file('logo');
-            $imageName = 'partner_' . $partner->id . '.' . $image->getClientOriginalExtension();
-            $imagePath = 'pictures/partners/' . $imageName;
 
             // Delete the old logo image if it exists
             if (Storage::exists('public/' . $partner->logo_src)) {
@@ -86,11 +78,11 @@ class PartnerController extends Controller
             }
 
             // Store the new image
-            $image->storeAs('public/' . $imagePath);
+
 
             // Update the Partner entry with the new logo path
             $partner->update([
-                'logo_src' => 'storage/' . $imagePath,
+                'logo_src' => uploadImage($image, 'partners')
             ]);
         }
 
@@ -115,6 +107,6 @@ class PartnerController extends Controller
         return response()->json(null, 204);  // HTTP 204 No Content
     }
 
-    // Helper function to generate the full image URL
+
 
 }

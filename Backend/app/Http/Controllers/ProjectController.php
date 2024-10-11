@@ -12,8 +12,8 @@ class ProjectController extends Controller
     {
         $project = Project::findOrFail($id);
 
-        $project->src = request()->getSchemeAndHttpHost() . '/' . $project->src;
-        $project->article_image = $project->article_image ? request()->getSchemeAndHttpHost() . '/' . $project->article_image : null;
+        $project->src = generateFullImageUrl($project->src);
+        $project->article_image = $project->article_image ? generateFullImageUrl($project->article_image) : null;
 
         return response()->json($project);
     }
@@ -34,19 +34,13 @@ class ProjectController extends Controller
         ]);
 
         $image = $request->file('image');
-        $imageName = 'project_' . time() . '.' . $image->getClientOriginalExtension();
-        $imagePath = 'pictures/projects/' . $imageName;
-        $image->storeAs('public/' . $imagePath);
-        $imageUrl = 'storage/' . $imagePath;
+        $imageUrl = uploadImage($image, 'projects');
 
         // Handle article image upload
         $articleImageUrl = null;
         if ($request->hasFile('article_image')) {
             $articleImage = $request->file('article_image');
-            $articleImageName = 'article_' . time() . '.' . $articleImage->getClientOriginalExtension();
-            $articleImagePath = 'pictures/projects/articles/' . $articleImageName;
-            $articleImage->storeAs('public/' . $articleImagePath);
-            $articleImageUrl = 'storage/' . $articleImagePath;
+            $articleImageUrl = uploadImage($articleImage, 'projects/articles');
         }
 
         // Create a new project
@@ -61,8 +55,8 @@ class ProjectController extends Controller
             'article_image' => $articleImageUrl,
         ]);
 
-        $project->src = request()->getSchemeAndHttpHost() . '/' . $project->src;
-        $project->article_image = $articleImageUrl ? request()->getSchemeAndHttpHost() . '/' . $project->article_image : null;
+        $project->src = generateFullImageUrl($project->src);
+        $project->article_image = $articleImageUrl ? generateFullImageUrl($project->article_image) : null;
 
         return response()->json($project, 201);
     }
@@ -88,32 +82,27 @@ class ProjectController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = 'project_' . $project->id . '.' . $image->getClientOriginalExtension();
-            $imagePath = 'pictures/projects/' . $imageName;
 
             if (Storage::exists('public/' . $project->src)) {
                 Storage::delete('public/' . $project->src);
             }
 
-            $image->storeAs('public/' . $imagePath);
-            $project->update(['src' => 'storage/' . $imagePath]);
+
+            $project->update(['src' => uploadImage($image, 'projects')]);
         }
 
         if ($request->hasFile('article_image')) {
             $articleImage = $request->file('article_image');
-            $articleImageName = 'article_' . $project->id . '.' . $articleImage->getClientOriginalExtension();
-            $articleImagePath = 'pictures/projects/articles/' . $articleImageName;
 
             if (Storage::exists('public/' . $project->article_image)) {
                 Storage::delete('public/' . $project->article_image);
             }
 
-            $articleImage->storeAs('public/' . $articleImagePath);
-            $project->update(['article_image' => 'storage/' . $articleImagePath]);
+            $project->update(['article_image' => uploadImage($articleImage, 'projects/articles')]);
         }
 
-        $project->src = request()->getSchemeAndHttpHost() . '/' . $project->src;
-        $project->article_image = $project->article_image ? request()->getSchemeAndHttpHost() . '/' . $project->article_image : null;
+        $project->src = generateFullImageUrl($project->src);
+        $project->article_image = generateFullImageUrl($project->article_image);
 
         return response()->json($project, 200);
     }

@@ -41,8 +41,8 @@ class BlogController extends Controller
     {
         $blog = Blog::findOrFail($id);
 
-        $blog->image = request()->getSchemeAndHttpHost() . '/' . $blog->image;
-        $blog->article_image = $blog->article_image ? request()->getSchemeAndHttpHost() . '/' . $blog->article_image : null;
+        $blog->image = generateFullImageUrl($blog->image);
+        $blog->article_image = $blog->article_image ? generateFullImageUrl($blog->article_image) : null;
 
         return response()->json($blog);
     }
@@ -60,87 +60,73 @@ class BlogController extends Controller
         ]);
 
         $image = $request->file('image');
-        $imageName = 'blog_' . time() . '.' . $image->getClientOriginalExtension();
-        $imagePath = 'pictures/blogs/' . $imageName;
-        $image->storeAs('public/' . $imagePath);
-        $imageUrl = 'storage/' . $imagePath;
+        $imageUrl = uploadImage($image, 'blog');
 
         $articleImageUrl = null;
         if ($request->hasFile('article_image')) {
             $articleImage = $request->file('article_image');
-            $articleImageName = 'article_' . time() . '.' . $articleImage->getClientOriginalExtension();
-            $articleImagePath = 'pictures/blogs/articles/' . $articleImageName;
-            $articleImage->storeAs('public/' . $articleImagePath);
-            $articleImageUrl = 'storage/' . $articleImagePath;
+            $articleImageUrl = uploadImage($articleImage, 'blog_article');
+
+            $blog = Blog::create([
+                'title' => $request->input('title'),
+                'subtitle' => $request->input('subtitle'),
+                'content' => $request->input('content'),
+                'image' => $imageUrl,
+                'article_image' => $articleImageUrl,
+            ]);
+
+            $blog->image = generateFullImageUrl($blog->image);
+            $blog->article_image = $articleImageUrl ? generateFullImageUrl($blog -> article_image) : null;
+
+            return response()->json($blog, 201);
         }
 
-        $blog = Blog::create([
-            'title' => $request->input('title'),
-            'subtitle' => $request->input('subtitle'),
-            'content' => $request->input('content'),
-            'image' => $imageUrl,
-            'article_image' => $articleImageUrl,
-        ]);
-
-        $blog->image = request()->getSchemeAndHttpHost() . '/' . $blog->image;
-        $blog->article_image = $articleImageUrl ? request()->getSchemeAndHttpHost() . '/' . $blog->article_image : null;
-
-        return response()->json($blog, 201);
     }
 
 
+        public
+        function update(Request $request, $id)
+        {
+            $blog = Blog::findOrFail($id);
 
+            $request->validate([
+                'title' => 'sometimes|string|max:255',
+                'subtitle' => 'sometimes|string|max:255',
+                'content' => 'sometimes|string',
+                'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg',
+                'article_image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg',
+            ]);
 
+            $blog->update($request->except(['image', 'article_image']));
 
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = uploadImage($image, 'blogs');
 
-    public function update(Request $request, $id)
-    {
-        $blog = Blog::findOrFail($id);
+                if (Storage::exists('public/' . $blog->image)) {
+                    Storage::delete('public/' . $blog->image);
+                }
 
-        $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'subtitle' => 'sometimes|string|max:255',
-            'content' => 'sometimes|string',
-            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg',
-            'article_image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg',
-        ]);
-
-        $blog->update($request->except(['image', 'article_image']));
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = 'blog_' . $blog->id . '.' . $image->getClientOriginalExtension();
-            $imagePath = 'pictures/blogs/' . $imageName;
-
-            if (Storage::exists('public/' . $blog->image)) {
-                Storage::delete('public/' . $blog->image);
+                $blog->update(['image' => $imageName]);
             }
 
-            $image->storeAs('public/' . $imagePath);
-            $blog->update(['image' => 'storage/' . $imagePath]);
-        }
+            if ($request->hasFile('article_image')) {
+                $articleImage = $request->file('article_image');
+                $articleImageName = uploadImage($articleImage, 'blogs/article');
 
-        if ($request->hasFile('article_image')) {
-            $articleImage = $request->file('article_image');
-            $articleImageName = 'article_' . $blog->id . '.' . $articleImage->getClientOriginalExtension();
-            $articleImagePath = 'pictures/blogs/articles/' . $articleImageName;
 
-            if (Storage::exists('public/' . $blog->article_image)) {
-                Storage::delete('public/' . $blog->article_image);
+                if (Storage::exists('public/' . $blog->article_image)) {
+                    Storage::delete('public/' . $blog->article_image);
+                }
+
+                $blog->update(['article_image' => $articleImageName]);
             }
 
-            $articleImage->storeAs('public/' . $articleImagePath);
-            $blog->update(['article_image' => 'storage/' . $articleImagePath]);
+            $blog->image = generateFullImageUrl($blog->image);
+            $blog->article_image = $blog->article_image ? generateFullImageUrl($blog->article_image) : null;
+
+            return response()->json($blog, 200);
         }
-
-        $blog->image = request()->getSchemeAndHttpHost() . '/' . $blog->image;
-        $blog->article_image = $blog->article_image ? request()->getSchemeAndHttpHost() . '/' . $blog->article_image : null;
-
-        return response()->json($blog, 200);
-    }
-
-
-
 
 
 
