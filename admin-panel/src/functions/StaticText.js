@@ -1,6 +1,6 @@
 // src/staticTexts.js
 import * as React from "react";
-import { List, Datagrid, TextField, EditButton, Edit, SimpleForm, TextInput, Create } from "react-admin";
+import {List, Datagrid, TextField, EditButton, Edit, SimpleForm, TextInput, Create, DeleteButton} from "react-admin";
 
 
 
@@ -18,6 +18,7 @@ export const StaticTextList = () => (
             <TextField source="key" />
             <TextField source="text" />
             <EditButton />
+            <DeleteButton />
         </Datagrid>
     </List>
 );
@@ -36,8 +37,8 @@ export const StaticTextEdit = () => (
 export const StaticTextCreate = () => (
     <Create>
         <SimpleForm>
-            <TextInput source="key" />
-            <TextInput source="text" multiline />
+            <TextInput source="key" required />
+            <TextInput source="text" multiline  required />
         </SimpleForm>
     </Create>
 );

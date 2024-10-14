@@ -11,7 +11,7 @@ import {
     BooleanInput,
     Create,
     useRecordContext,
-    ImageInput, ImageField
+    ImageInput, ImageField, DeleteButton
 } from "react-admin";
 
 // List View for Pages
@@ -23,6 +23,7 @@ export const PageList = () => (
             <TextField source="title" />
             <TextField source="is_active" />
             <EditButton />
+            <DeleteButton />
         </Datagrid>
     </List>
 );
@@ -51,11 +52,11 @@ export const PageEdit = () => (
 export const PageCreate = () => (
     <Create>
         <SimpleForm>
-            <TextInput source="title" />
-            <TextInput source="slug" />
-            <TextInput source="hero_title" />
+            <TextInput source="title" required />
+            <TextInput source="slug"  required/>
+            <TextInput source="hero_title" required />
             <TextInput source="description" />
-            <ImageInput source="hero_image" label="Hero Image" />
+            <ImageInput source="hero_image" label="Hero Image" required />
             <BooleanInput source="is_active" />
         </SimpleForm>
     </Create>

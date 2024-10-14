@@ -11,22 +11,25 @@ import {
     SimpleForm,
     TextInput,
     ImageInput,
-    Create,
+    Create, SearchInput, ReferenceInput,
 } from 'react-admin';
 
 
-
+const BlogFilters = [
+    <SearchInput source="search"   alwaysOn/>
+];
 
 
 // List component for displaying blogs
 export const BlogList = (props) => (
-    <List {...props} pagination={<Pagination />} title="All Blogs" perPage={10}>
+    <List {...props} pagination={<Pagination />} title="All Blogs" filters={BlogFilters} perPage={10}>
         <Datagrid rowClick="edit">
             <TextField source="title" label="Title" />
             <TextField source="subtitle" label="Subtitle" />
             <TextField source="content" label="Content" />
 
             <ImageField source="image" />
+            <ImageField source="article_image" />
 
 
             <EditButton />
@@ -45,7 +48,12 @@ export const BlogEdit = (props) => (
             {/* Adjust ImageField to include the full URL */}
             <TextField value="Current Image" />
             <ImageField  source="image"/>
-            <ImageInput source="image" label=" New Blog Image" accept=".jpg,.png,.jpeg">
+            <ImageInput source="image" label=" New  Article Blog Image" accept=".jpg,.png,.jpeg">
+                <ImageField  source="src"/>
+            </ImageInput>
+
+            <ImageField  source="article_image"/>
+            <ImageInput source="article_image" label=" New Blog Article Image" accept=".jpg,.png,.jpeg">
                 <ImageField  source="src"/>
             </ImageInput>
 
@@ -59,8 +67,14 @@ export const BlogCreate = (props) => (
         <SimpleForm>
             <TextInput source="title" label="Title" fullWidth  required/>
             <TextInput source="subtitle" label="Subtitle" fullWidth required />
-            <TextInput source="content" label="Content" multiline fullWidth required  multiline/>
-            {/* Image upload for new blog */}
+            <TextInput source="content" label="Content" multiline fullWidth required  multiline required/>
+
+            <ImageField  source="article_image" />
+            <ImageInput source="article_image" label=" New Blog  Article Image" accept=".jpg,.png,.jpeg" required>
+                <ImageField  source="src"/>
+            </ImageInput>
+
+
             <ImageInput source="image" label="Blog Image" accept=".jpg,.png,.jpeg" required>
                 <ImageField source="image" />
             </ImageInput>

@@ -24,8 +24,8 @@ export const SettingEdit = props => (
 export const SettingCreate = props => (
     <Create {...props}>
         <SimpleForm>
-            <TextInput source="key" />
-            <TextInput source="value" />
+            <TextInput source="key" required />
+            <TextInput source="value" required />
         </SimpleForm>
     </Create>
 );

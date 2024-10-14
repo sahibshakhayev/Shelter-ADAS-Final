@@ -11,7 +11,7 @@ import {
     SimpleForm,
     TextInput,
     ImageInput,
-    Create,
+    Create, ReferenceInput,
 } from 'react-admin';
 
 
@@ -19,12 +19,11 @@ import {
 
 
 // List component for displaying blogs
-export const BrandValuesList = (props) => (
-    <List {...props} pagination={<Pagination />} title="All Brand Values" perPage={10}>
+export const SubbrandsList = (props) => (
+    <List {...props} pagination={<Pagination />} title="Subbrands" perPage={10}>
         <Datagrid rowClick="edit">
-            <TextField source="title" label="Title" />
-            <TextField source="description" label="Description" />
-            <ImageField source="icon" />
+            <TextField source="logo_alt" label="Logo Alt" />
+            <ImageField source="logo" />
             <EditButton />
             <DeleteButton />
         </Datagrid>
@@ -32,15 +31,14 @@ export const BrandValuesList = (props) => (
 );
 
 // Edit component for editing a blog
-export const BrandValueEdit = (props) => (
-    <Edit {...props} title="Edit Brand Value">
+export const SubbrandEdit = (props) => (
+    <Edit {...props} title="Edit Subbrand">
         <SimpleForm>
-            <TextInput source="title" label="Title" fullWidth />
-            <TextInput source="description" label="Description" fullWidth  multiline/>
+            <TextInput source="logo_alt" label="Logo alt" fullWidth />
             {/* Adjust ImageField to include the full URL */}
-            <ImageField  source="icon"/>
-            <ImageInput source="icon" label="New Brand Value icon" accept=".jpg,.png,.jpeg">
-                <ImageField  source="src"/>
+            <ImageField  source="logo"/>
+            <ImageInput source="logo" label="New Logo" accept=".jpg,.png,.jpeg">
+                <ImageField  source="logo"/>
             </ImageInput>
 
         </SimpleForm>
@@ -48,14 +46,14 @@ export const BrandValueEdit = (props) => (
 );
 
 // Create component for creating a new blog
-export const BrandValueCreate = (props) => (
-    <Create {...props} title="Create Brand Value">
+export const SubbrandCreate = (props) => (
+    <Create {...props} title="Create Subbrand">
         <SimpleForm>
-            <TextInput source="title" label="Title" fullWidth  required/>
-            <TextInput source="description" label="Description" fullWidth required  multiline/>
+            <TextInput source="logo_alt" label="Logo Alt" fullWidth  required/>
+            <ReferenceInput source='about_us_id' label="About Us Id" reference="about-us" required/>
             {/* Image upload for new blog */}
-            <ImageInput source="icon" label="Brand Value icon" accept=".jpg,.png,.jpeg" required>
-                <ImageField source="icon" />
+            <ImageInput source="logo" label="Subbrand logo" accept=".jpg,.png,.jpeg" required>
+                <ImageField source="logo" />
             </ImageInput>
         </SimpleForm>
     </Create>

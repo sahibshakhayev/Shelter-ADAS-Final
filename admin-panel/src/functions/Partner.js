@@ -34,8 +34,8 @@ export const PartnerCreate = props => (
     <Create {...props}>
         <SimpleForm>
             <TextInput source="alt_text" label="Alt Text" />
-            <TextInput source="website_link" label="Website Link" />
-            <ImageInput source="logo" label="Logo" accept="image/*">
+            <TextInput source="website_link" label="Website Link"  />
+            <ImageInput source="logo" label="Logo" accept="image/*" required>
                 <ImageField source="logo_src" />
             </ImageInput>
         </SimpleForm>

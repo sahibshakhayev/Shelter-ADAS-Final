@@ -8,6 +8,7 @@ import {
     EditButton,
     DeleteButton,
     Edit,
+    SearchInput,
     SimpleForm,
     TextInput,
     useDataProvider,
@@ -19,6 +20,7 @@ import {useEffect, useState} from "react";
 // List view for translations
 
 const TranslationFilters = [
+    <SearchInput source="search"   alwaysOn/>,
     <ReferenceInput source="lang_id" reference="languages"  label="Select Language"  alwaysOn />,
 ];
 
@@ -54,9 +56,9 @@ export const TranslationEdit = (props) => (
 export const TranslationCreate = (props) => (
     <Create {...props}>
         <SimpleForm>
-            <TextInput source="key" multiline />
-            <TextInput source="value" multiline />
-            <ReferenceInput source="language_id" label="Language"  choices={props.languages} reference="languages" />
+            <TextInput source="key" multiline required/>
+            <TextInput source="value" multiline required />
+            <ReferenceInput source="language_id" label="Language"  choices={props.languages} reference="languages" required/>
         </SimpleForm>
     </Create>
 );

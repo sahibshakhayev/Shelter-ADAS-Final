@@ -27,8 +27,8 @@ export const LanguageEdit = (props) => (
 export const LanguageCreate = (props) => (
     <Create {...props}>
         <SimpleForm>
-            <TextInput source="code" />
-            <TextInput source="name" />
+            <TextInput source="code" required />
+            <TextInput source="name" required/>
         </SimpleForm>
     </Create>
 );

@@ -1,9 +1,9 @@
 import { fetchUtils } from 'react-admin';
 import simpleRestProvider from 'ra-data-simple-rest';
 import queryString from 'query-string';
+import {API_BASE_URL} from './config'
 
-
-const apiUrl = 'http://localhost:8000/api';
+const apiUrl = `${API_BASE_URL}api`;
 
 const httpClient = (url, options = {}) => {
     if (!options.headers) {
@@ -56,7 +56,7 @@ const myDataProvider = {
         if (resource === 'services') {
             const { page, perPage } = params.pagination;
             const { field, order } = params.sort;
-            const search = params.filter.q || '';
+            const search = params.filter.search || '';
 
             const url = `${apiUrl}/services?page=${page}&perPage=${perPage}&_sort=${field}&_order=${order}&search=${search}`;
 
@@ -70,7 +70,7 @@ const myDataProvider = {
         if (resource === 'partners') {
             return httpClient(`${apiUrl}/partners`)
                 .then(({ json }) => ({
-                    data: json.map((partner, index) => ({ ...partner, id: index + 1 })),  // If no `id` field, generate one
+                    data: json.map((partner, index) => ({ ...partner})),  // If no `id` field, generate one
                     total: json.length,  // Assuming the API returns the full list
                 }));
         }
@@ -78,7 +78,7 @@ const myDataProvider = {
         if (resource === 'projects') {
             const { page, perPage } = params.pagination;
             const { field, order } = params.sort;
-            const search = params.filter.q || '';
+            const search = params.filter.search || '';
 
             const url = `${apiUrl}/projects?page=${page}&perPage=${perPage}&_sort=${field}&_order=${order}&search=${search}`;
 
@@ -89,6 +89,27 @@ const myDataProvider = {
                 }));
         }
 
+
+
+        if (resource == 'brandvalues' || resource == 'subbrands') {
+
+            const { page, perPage } = params.pagination;
+            const { field, order } = params.sort;
+            const query = {
+                sort: field,
+                order: order,
+                page: page,
+                per_page: perPage,
+                ...params.filter,
+            };
+            const url = `${apiUrl}/about-us`;
+            return httpClient(url).then(({ headers, json }) => ({
+                data: json[resource == 'brandvalues' ? 'brand_values' : resource], // Assuming Laravel returns data in 'data'
+                total: json.total, // Assuming Laravel returns pagination in 'meta'
+            }));
+
+        }
+
         if (resource === 'about-us') {
             return httpClient(`${apiUrl}/about-us`)
                 .then(({ json }) => ({
@@ -96,6 +117,10 @@ const myDataProvider = {
                     total:1// Assuming API returns a single AboutUs entry
                 }));
         }
+
+
+
+
         if (resource === 'contactings') {
             let arr;
             return httpClient(`${apiUrl}/contactings/contact`)
@@ -112,8 +137,16 @@ const myDataProvider = {
             const { page, perPage } = params.pagination;
             const { field, order } = params.sort;
 
+            const query = {
+                sort: field,
+                order: order,
+                page: page,
+                per_page: perPage,
+                ...params.filter,
+            };
+
             // Adjust API to handle pagination and sorting
-            const url = `${apiUrl}/blogs?_page=${page}&_perPage=${perPage}&_sort=${field}&_order=${order}`;
+            const url = `${apiUrl}/blogs?${queryString.stringify(query)}`;
 
             return httpClient(url)
                 .then(({ json }) => ({
@@ -169,6 +202,18 @@ const myDataProvider = {
                 }));
         }
 
+        if (resource == 'brandvalues' || resource == 'subbrands') {
+
+            console.log(params.id);
+            const url = `${apiUrl}/about-us`;
+            return httpClient(url).then(({ json }) => {
+
+
+                return {data: json[resource == 'brandvalues' ? 'brand_values' : resource].find(item => item.id == params.id)}
+            });
+
+        }
+
 
         if (resource === 'services') {
             return httpClient(`${apiUrl}/services/${params.id}`)
@@ -199,9 +244,14 @@ const myDataProvider = {
             return httpClient(`${apiUrl}/partners`)
                 .then(({ json }) => {
                     const partners = json.find(item => item.id == params.id);
+
+
+
+
                     if (!partners) {
                         return Promise.reject(new Error("Parthners does not exist"));
                     }
+
                     return { data: partners };
                 });
         }
@@ -260,40 +310,10 @@ const myDataProvider = {
             formData.append('image_alt', params.data.image_alt || '');
 
             // Handle image upload (if provided)
-            if (params.data.image && params.data.image.rawFile) {
-                formData.append('image', params.data.image.rawFile);
+            if (params.data['left_image'] && params.data['left_image'].rawFile) {
+                formData.append('left_image', params.data['left_image'].rawFile);
             }
 
-            // Handle Subbrands (if provided)
-            if (params.data.subbrands) {
-                params.data.subbrands.forEach((subbrand, index) => {
-                    if (subbrand.logo && subbrand.logo.rawFile) {
-                        formData.append(`subbrands[${index}][logo]`, subbrand.logo.rawFile);
-                    }
-                    formData.append(`subbrands[${index}][logo_alt]`, subbrand.logo_alt);
-                    formData.append(`subbrands[${index}][about_us_id]`, params.id);
-                    formData.append(`subbrands[${index}][id]`, subbrand.id ? subbrand.id : null);
-                });
-            }
-
-            // Handle Brand Values (if provided)
-            if (params.data.brand_values) {
-                params.data.brand_values.forEach((brandValue, index) => {
-                    // Handle icon file upload
-                    if (brandValue.icon && brandValue.icon.rawFile) {
-                        formData.append(`brand_values[${index}][icon]`, brandValue.icon.rawFile);
-                    }
-
-                    formData.append(`brand_values[${index}][title]`, brandValue.title);
-                    formData.append(`brand_values[${index}][description]`, brandValue.description);
-                    formData.append(`brand_values[${index}][about_us_id]`, params.id);
-
-                    // Only append 'id' if it exists (for updating existing brand values)
-                    if (brandValue.id) {
-                        formData.append(`brand_values[${index}][id]`, brandValue.id);
-                    }
-                });
-            }
 
             // Ensure it's an update request
             formData.append('_method', 'PUT');
@@ -307,6 +327,59 @@ const myDataProvider = {
             }));
         }
 
+
+
+        if (resource === 'brandvalues') {
+            const formData = new FormData();
+
+            // Append AboutUs fields
+            formData.append('title', params.data.title);
+            formData.append('description', params.data.description);
+
+            // Handle image upload (if provided)
+            if (params.data.icon && params.data.icon.rawFile) {
+                formData.append('icon', params.data.icon.rawFile);
+            }
+
+
+            // Ensure it's an update request
+            formData.append('_method', 'PUT');
+
+            // Send the request
+            return httpClient(`${apiUrl}/admin/about-us/brandValue/${params.id}`, {
+                method: 'POST',  // To support file uploads, using POST with PUT method override
+                body: formData,
+            }).then(({ json }) => ({
+                data: json,
+            }));
+        }
+
+
+
+        if (resource === 'subbrands') {
+            const formData = new FormData();
+
+            // Append AboutUs fields
+            formData.append('logo_alt', params.data['logo_alt']);
+
+
+            // Handle image upload (if provided)
+            if (params.data.logo && params.data.logo.rawFile) {
+                formData.append('logo', params.data.logo.rawFile);
+            }
+
+
+            // Ensure it's an update request
+            formData.append('_method', 'PUT');
+
+            // Send the request
+            return httpClient(`${apiUrl}/admin/about-us/subbrand/${params.id}`, {
+                method: 'POST',  // To support file uploads, using POST with PUT method override
+                body: formData,
+            }).then(({ json }) => ({
+                data: json,
+            }));
+        }
 
 
         if (resource === 'partners') {
@@ -339,6 +412,11 @@ const myDataProvider = {
                 formData.append('image', params.data.image.rawFile); // Ensure the raw file is appended
             }
 
+
+            if (params.data['article_image'] && params.data['article_image'].rawFile) {
+                formData.append('article_image', params.data['article_image'].rawFile); // Ensure the raw file is appended
+            }
+
             return httpClient(`${apiUrl}/admin/blogs/${params.id}`, {
                 method: 'POST',
                 body: formData, // Send the FormData with the file
@@ -359,7 +437,7 @@ const myDataProvider = {
             formData.append('hero_description', params.data['hero_description']);
             formData.append('is_active', Number(params.data['is_active']));
             formData.append('_method', 'PUT');
-            if (params.data.image && params.data.hero_image.rawFile) {
+            if (params.data['hero_image'] && params.data['hero_image'].rawFile) {
                 formData.append('hero_image', params.data['hero_image'].rawFile); // Ensure the raw file is appended
             }
 
@@ -419,6 +497,11 @@ const myDataProvider = {
                 formData.append('image', params.data.image.rawFile);  // Handle image file
             }
 
+            if (params.data['article_image'] && params.data['article_image'].rawFile) {
+                formData.append('article_image', params.data['article_image'].rawFile); // Ensure the raw file is appended
+            }
+
+
             formData.append('_method', 'PUT');
 
             return httpClient(`${apiUrl}/admin/services/${params.id}`, {
@@ -440,6 +523,11 @@ const myDataProvider = {
 
             if (params.data.image && params.data.image.rawFile) {
                 formData.append('image', params.data.image.rawFile);  // Handle image file
+            }
+
+
+            if (params.data['article_image'] && params.data['article_image'].rawFile) {
+                formData.append('article_image', params.data['article_image'].rawFile); // Ensure the raw file is appended
             }
 
             formData.append('_method', 'PUT');
@@ -483,29 +571,8 @@ const myDataProvider = {
             formData.append('image_alt', params.data.image_alt || '');
 
             // Handle image upload (if provided)
-            if (params.data.image && params.data.image.rawFile) {
-                formData.append('image', params.data.image.rawFile);
-            }
-
-            // Handle Subbrands (if provided)
-            if (params.data.subbrands) {
-                params.data.subbrands.forEach((subbrand, index) => {
-                    if (subbrand.logo && subbrand.logo.rawFile) {
-                        formData.append(`subbrands[${index}][logo]`, subbrand.logo.rawFile);
-                    }
-                    formData.append(`subbrands[${index}][logo_alt]`, subbrand.logo_alt);
-                });
-            }
-
-            // Handle Brand Values (if provided)
-            if (params.data.brand_values) {
-                params.data.brand_values.forEach((brandValue, index) => {
-                    if (brandValue.icon && brandValue.icon.rawFile) {
-                        formData.append(`brand_values[${index}][icon]`, brandValue.icon.rawFile);
-                    }
-                    formData.append(`brand_values[${index}][title]`, brandValue.title);
-                    formData.append(`brand_values[${index}][description]`, brandValue.description);
-                });
+            if (params.data['left_image'] && params.data['left_image'].rawFile) {
+                formData.append('left_image', params.data['left_image'].rawFile);
             }
 
             return httpClient(`${apiUrl}/admin/about-us`, {
@@ -531,6 +598,63 @@ const myDataProvider = {
             }));
         }
 
+
+
+
+        if (resource === 'brandvalues') {
+            const formData = new FormData();
+
+            // Append AboutUs fields
+            formData.append('title', params.data.title);
+            formData.append('description', params.data.description);
+
+            // Handle image upload (if provided)
+            if (params.data.icon && params.data.icon.rawFile) {
+                formData.append('icon', params.data.icon.rawFile);
+            }
+
+
+
+            // Send the request
+            return httpClient(`${apiUrl}/admin/about-us/${params.data['about_us_id']}/brandValues`, {
+                method: 'POST',  // To support file uploads, using POST with PUT method override
+                body: formData,
+            }).then(({ json }) => ({
+                data: json,
+            }));
+        }
+
+
+
+        if (resource === 'subbrands') {
+            const formData = new FormData();
+
+            // Append AboutUs fields
+            formData.append('logo_alt', params.data['logo_alt']);
+
+
+            // Handle image upload (if provided)
+            if (params.data.logo && params.data.logo.rawFile) {
+                formData.append('logo', params.data.logo.rawFile);
+            }
+
+
+
+
+            // Send the request
+            return httpClient(`${apiUrl}/admin/about-us/${params.data['about_us_id']}/subbrands`, {
+                method: 'POST',  // To support file uploads, using POST with PUT method override
+                body: formData,
+            }).then(({ json }) => ({
+                data: json,
+            }));
+        }
+
+
+
+
+
+
         if (resource === 'projects') {
             const formData = new FormData();
             formData.append('title', params.data.title);
@@ -544,6 +668,10 @@ const myDataProvider = {
                 formData.append('image', params.data.image.rawFile);  // Handle image file
             }
 
+
+            if (params.data['article_image'] && params.data['article_image'].rawFile) {
+                formData.append('article_image', params.data['article_image'].rawFile); // Ensure the raw file is appended
+            }
 
             return httpClient(`${apiUrl}/admin/projects`, {
                 method: 'POST',
@@ -581,6 +709,10 @@ const myDataProvider = {
                 formData.append('image', params.data.image.rawFile);  // Handle image file
             }
 
+            if (params.data['article_image'] && params.data['article_image'].rawFile) {
+                formData.append('article_image', params.data['article_image'].rawFile); // Ensure the raw file is appended
+            }
+
             return httpClient(`${apiUrl}/admin/services`, {
                 method: 'POST',
                 body: formData,
@@ -607,7 +739,7 @@ const myDataProvider = {
                 method: 'POST',
                 body: formData, // Send the FormData with the file
 
-            }).then(({ json }) => ({ data: json }));
+            }).then(({ json }) => ({ data: json.data }));
         }
 
 
@@ -617,16 +749,21 @@ const myDataProvider = {
             formData.append('slug', params.data.slug);
             formData.append('hero_title', params.data.title);
             formData.append('hero_description', params.data.hero_description);
-            formData.append('is_active', params.data.is_active);
-            if (params.data.image && params.data.hero_image.rawFile) {
-                formData.append('hero_image', params.data.image.rawFile); // Ensure the raw file is appended
+            formData.append('is_active', Number(params.data['is_active']));
+            if (params.data['hero_image'] && params.data['hero_image'].rawFile) {
+                formData.append('hero_image', params.data['hero_image'].rawFile); // Ensure the raw file is appended
             }
 
             return httpClient(`${apiUrl}/admin/pages`, {
                 method: 'POST',
                 body: formData, // Send the FormData with the file
 
-            }).then(({ json }) => ({ data: json }));
+            }).then(({ json }) => {
+
+                return {data: json.data }
+
+
+            });
         }
 
         if (resource === 'translations' || resource === 'languages') {
@@ -647,6 +784,10 @@ const myDataProvider = {
                 formData.append('image', params.data.image.rawFile);
             }
 
+            if (params.data['article_image'] && params.data['article_image'].rawFile) {
+                formData.append('article_image', params.data['article_image'].rawFile); // Ensure the raw file is appended
+            }
+
             return httpClient(`${apiUrl}/admin/blogs`, {
                 method: 'POST',
                 body: formData,
@@ -657,14 +798,31 @@ const myDataProvider = {
         return simpleRestProvider(apiUrl, httpClient).create(resource, params);
     },
 
-    getMany: (resource, params) => {
-        const query = {
-            filter: JSON.stringify({ id: params.ids }),
-        };
-        const url = `${apiUrl}/${resource}?${queryString.stringify(query)}`;
-        return httpClient(url).then(({ json }) => ({
-            data: json.data,
-        }));
+    getMany:
+        (resource, params) => {
+
+        if (resource === 'about-us' || resource === 'brandvalues' ) {
+                return httpClient(`${apiUrl}/about-us`)
+                    .then(({ json }) => {
+                        return {data: Array(json)}
+
+                    });
+            }
+
+
+        else {
+            const query = {
+                filter: JSON.stringify({id: params.ids}),
+            };
+            const url = `${apiUrl}/${resource}?${queryString.stringify(query)}`;
+            return httpClient(url).then(({json}) => ({
+                data: json.data,
+            }));
+
+        }
+
+
+
     },
 
     getManyReference: (resource, params) => {
@@ -724,10 +882,6 @@ const myDataProvider = {
 
         if (resource === 'statictexts') {
             const formData = new FormData();
-            formData.append('key', params.data.key);
-            formData.append('text', params.data.text);
-
-
             return httpClient(`${apiUrl}/admin/static/${params.id}`, {
                 method: 'DELETE',
                 body: formData, // Send the FormData with the file
@@ -774,6 +928,13 @@ const myDataProvider = {
             }));
         }
 
+        if (resource === 'brandvalues' || resource === 'subbrands') {
+            return httpClient(`${apiUrl}/admin/about-us/${resource == 'brandvalues' ? 'brandValue' : 'subbrand'}/${params.id}`, {
+                method: 'DELETE',
+            }).then(({ json }) => ({
+                data: json,
+            }));
+        }
 
         if (resource === 'pages') {
             return httpClient(`${apiUrl}/admin/page/${params.id}`, {
