@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('translations', function (Blueprint $table) {
             $table->id();
-            $table->string('key'); // Translation key, e.g., 'welcome', 'message'
-            $table->string('value'); // Translation value, e.g., 'Welcome!', 'Добро пожаловать!'
+            $table->text('key'); // Translation key, e.g., 'welcome', 'message'
+            $table->text('value'); // Translation value, e.g., 'Welcome!', 'Добро пожаловать!'
             $table->foreignId('language_id')->constrained('languages')->onDelete('cascade');
             $table->timestamps();
         });

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('static_texts', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique(); // e.g., 'about-us', 'contact', 'services'
-            $table->string('text');
+            $table->text('text');
             $table->timestamps();
         });
     }
