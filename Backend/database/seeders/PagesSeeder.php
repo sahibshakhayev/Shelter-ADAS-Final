@@ -14,6 +14,7 @@ class PagesSeeder extends Seeder
             [
                 'slug' => 'home',
                 'title' => 'Home',
+                'link' => '',
                 'hero_title' => 'Home',
                 'hero_image' => 'storage/pictures/hero_1.png',
                 'hero_description' => null,
@@ -24,6 +25,7 @@ class PagesSeeder extends Seeder
             [
                 'slug' => 'services',
                 'title' => 'Services',
+                'link' => 'services',
                 'hero_title' => 'Services',
                 'hero_image' => 'storage/pictures/hero_2.jpg',
                 'hero_description' => null,
@@ -34,6 +36,7 @@ class PagesSeeder extends Seeder
             [
                 'slug' => 'blogs',
                 'title' => 'Blogs',
+                'link' => 'blogs',
                 'hero_title' => 'Blogs',
                 'hero_image' => 'storage/pictures/pages/j9eSRgTT9I3RXSyGAlKS0dIJBxr8opJz27YnJPdp.jpeg',
                 'hero_description' => null,
@@ -44,6 +47,7 @@ class PagesSeeder extends Seeder
             [
                 'slug' => 'projects',
                 'title' => 'Projects',
+                'link' => 'projects',
                 'hero_title' => 'Projects',
                 'hero_image' => 'storage/pictures/pages/Drxt1PcJDIrBnPtdBuySrpNy7S16XkrV3FDDfwSg.jpeg',
                 'hero_description' => null,
@@ -54,6 +58,7 @@ class PagesSeeder extends Seeder
             [
                 'slug' => 'contact',
                 'title' => 'Contact',
+                'link' => 'contact',
                 'hero_title' => 'Contact',
                 'hero_image' => 'storage/pictures/pages/sr5Div2iNQzW5HfXApSFXoTs0D8Mj8fQUX4nucB4.jpg',
                 'hero_description' => 'Services from us are trusted, reliable and professional. Please fill out the form completely, and we will get back to you as soon as possible',
@@ -64,6 +69,7 @@ class PagesSeeder extends Seeder
             [
                 'slug' => 'about',
                 'title' => 'About Us',
+                'link' => 'about',
                 'hero_title' => 'About Us',
                 'hero_image' => 'storage/pictures/pages/iXficC5jMhBwnl3M1L0BWygwnlW501fJV9aP9e8Q.jpg',
                 'hero_description' => null,

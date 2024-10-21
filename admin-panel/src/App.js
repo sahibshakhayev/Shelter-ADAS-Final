@@ -9,6 +9,7 @@ import CustomLoginPage from './CustomLoginPage';
 
 // Import Icons
 import BookIcon from '@mui/icons-material/Book';
+import ProductIcon from '@mui/icons-material/List'
 import SettingsIcon from '@mui/icons-material/Settings';
 import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 import PeopleIcon from '@mui/icons-material/People';
@@ -39,6 +40,9 @@ import { BrandValuesList, BrandValueCreate, BrandValueEdit } from "./functions/B
 import myTheme from "./myTheme";
 import CustomDashboard from "./CustomDashboard";
 import CustomLayout from "./CustomLayout";
+import {ProductCreate, ProductEdit, ProductList} from "./functions/Products";
+import {CategoryCreate, CategoryEdit, CategoryList} from "./functions/Category";
+import {SubcategoryCreate, SubcategoryEdit, SubcategoryList} from "./functions/Subcategory";
 
 
 const App = () => (
@@ -61,6 +65,9 @@ const App = () => (
             <Resource name="contactings" list={ContactingList} edit={ContactingEdit} create={ContactingCreate} icon={ContactPhoneIcon} />
             <Resource name="partners" list={PartnerList} edit={PartnerEdit} create={PartnerCreate} icon={PeopleIcon} />
             <Resource name="pages" list={PageList} edit={PageEdit} create={PageCreate} icon={PagesIcon} />
+            <Resource name="products" list={ProductList} edit={ProductEdit}  create={ProductCreate} icon={ProductIcon} />
+            <Resource name="categories" list={CategoryList} edit={CategoryEdit} create={CategoryCreate} icon={BookIcon} />
+            <Resource name="subcategories" list={SubcategoryList} edit={SubcategoryEdit} create={SubcategoryCreate} icon={BusinessIcon} />
             <Resource name="statictexts" list={StaticTextList} edit={StaticTextEdit} create={StaticTextCreate} icon={TextFieldsIcon} />
             <Resource name="translations" list={TranslationList} edit={TranslationEdit} create={TranslationCreate} icon={TranslateIcon} />
             <Resource name="languages" list={LanguageList} edit={LanguageEdit} create={LanguageCreate} icon={LanguageIcon} />

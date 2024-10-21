@@ -3,7 +3,7 @@ import simpleRestProvider from 'ra-data-simple-rest';
 import queryString from 'query-string';
 import {API_BASE_URL} from './config'
 
-const apiUrl = `${API_BASE_URL}api`;
+const apiUrl = `${API_BASE_URL}/api`;
 
 const httpClient = (url, options = {}) => {
     if (!options.headers) {
@@ -32,6 +32,42 @@ const myDataProvider = {
                         total: json.total // The total count for pagination
                     };
                 });
+        }
+
+        if (resource === 'products') {
+            const { page, perPage } = params.pagination;
+            const { field, order } = params.sort;
+
+            const query = {
+                _sort: field,
+                _order: order,
+                _page: page,
+                _limit: perPage,
+                ...params.filter, // Includes search query as 'q'
+            };
+
+            const url = `${apiUrl}/${resource}?${queryString.stringify(query)}`;
+            return httpClient(url).then(({ headers, json }) => ({
+                data: json.data,
+                total: json.total,
+            }));
+        }
+
+
+        if (resource === 'categories' || resource === 'subcategories') {
+
+
+
+            const query = {
+
+                ...params.filter, // Includes search query as 'q'
+            };
+
+            const url = `${apiUrl}/${resource}?${queryString.stringify(query)}`;
+            return httpClient(url).then(({ headers, json }) => ({
+                data: json,
+                total: json.length,
+            }));
         }
 
         if (resource == 'languages' || resource == 'translations') {
@@ -329,6 +365,36 @@ const myDataProvider = {
 
 
 
+
+        if (resource === 'products') {
+            const formData = new FormData();
+
+
+            formData.append('title', params.data.title);
+            formData.append('description', params.data.description);
+            formData.append('subcategory_id', params.data.subcategory_id);
+            formData.append('client', params.data.client);
+            formData.append('location', params.data.location);
+            formData.append('date', params.data.date);
+
+            // Handle image upload (if provided)
+            if (params.data['image'] && params.data['image'].rawFile) {
+                formData.append('image', params.data['image'].rawFile);
+            }
+
+
+            // Ensure it's an update request
+            formData.append('_method', 'PUT');
+
+            // Send the request
+            return httpClient(`${apiUrl}/admin/products/${params.id}`, {
+                method: 'POST',  // To support file uploads, using POST with PUT method override
+                body: formData,
+            }).then(({ json }) => ({
+                data: json,
+            }));
+        }
+
         if (resource === 'brandvalues') {
             const formData = new FormData();
 
@@ -476,6 +542,22 @@ const myDataProvider = {
             }).then(({ json }) => ({ data: json }));
         }
 
+
+        if (resource === 'categories') {
+            return httpClient(`${apiUrl}/admin/categories/${params.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(params.data),
+            }).then(({ json }) => ({ data: json }));
+        }
+
+
+        if (resource === 'subcategories') {
+            return httpClient(`${apiUrl}/admin/subcategories/${params.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(params.data),
+            }).then(({ json }) => ({ data: json }));
+        }
+
         if (resource === 'translations' || resource === 'languages') {
             return httpClient(`${apiUrl}/admin/${resource}/${params.id}`, {
                 method: 'PUT',
@@ -599,7 +681,33 @@ const myDataProvider = {
         }
 
 
+        if (resource === 'products') {
+            const formData = new FormData();
 
+
+            formData.append('title', params.data.title);
+            formData.append('description', params.data.description);
+            formData.append('subcategory_id', params.data.subcategory_id);
+            formData.append('client', params.data.client);
+            formData.append('location', params.data.location);
+            formData.append('date', params.data.date);
+
+            // Handle image upload (if provided)
+            if (params.data['image'] && params.data['image'].rawFile) {
+                formData.append('image', params.data['image'].rawFile);
+            }
+
+
+            // Ensure it's an update request
+
+            // Send the request
+            return httpClient(`${apiUrl}/admin/products`, {
+                method: 'POST',  // To support file uploads, using POST with PUT method override
+                body: formData,
+            }).then(({ json }) => ({
+                data: json,
+            }));
+        }
 
         if (resource === 'brandvalues') {
             const formData = new FormData();
@@ -774,6 +882,22 @@ const myDataProvider = {
         }
 
 
+        if (resource === 'categories') {
+            return httpClient(`${apiUrl}/admin/categories`, {
+                method: 'POST',
+                body: JSON.stringify(params.data),
+            }).then(({ json }) => ({ data: json }));
+        }
+
+
+        if (resource === 'subcategories') {
+            return httpClient(`${apiUrl}/admin/categories/${params.data.category_id}/subcategories`, {
+                method: 'POST',
+                body: JSON.stringify(params.data),
+            }).then(({ json }) => ({ data: json }));
+        }
+
+
         if (resource === 'blogs') {
             const formData = new FormData();
             formData.append('title', params.data.title);
@@ -808,6 +932,15 @@ const myDataProvider = {
 
                     });
             }
+
+        else if (resource === 'categories') {
+            return httpClient(`${apiUrl}/categories`)
+                .then(({ json }) => ({
+
+                    data: json,
+                    total: json.length //
+                }));
+        }
 
 
         else {
@@ -942,6 +1075,24 @@ const myDataProvider = {
             }).then(({ json }) => ({ data: json }));
         }
 
+        if (resource === 'products') {
+            return httpClient(`${apiUrl}/admin/products/${params.id}`, {
+                method: 'DELETE',
+            }).then(({ json }) => ({ data: json }));
+        }
+
+        if (resource === 'categories') {
+            return httpClient(`${apiUrl}/admin/categories/${params.id}`, {
+                method: 'DELETE',
+            }).then(({ json }) => ({ data: json }));
+        }
+
+
+        if (resource === 'subcategories') {
+            return httpClient(`${apiUrl}/admin/subcategories/${params.id}`, {
+                method: 'DELETE',
+            }).then(({ json }) => ({ data: json }));
+        }
 
         // Fallback for other resources
         return simpleRestProvider(apiUrl, httpClient).delete(resource, params);

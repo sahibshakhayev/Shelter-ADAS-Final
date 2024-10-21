@@ -34,6 +34,7 @@ export const PageEdit = () => (
         <SimpleForm>
             <TextInput source="title" />
             <TextInput source="slug" />
+            <TextInput source="link" />
             <TextInput source="hero_title" />
             <TextInput source="hero_description" />
             <ImageField source="hero_image"/>
@@ -54,6 +55,7 @@ export const PageCreate = () => (
         <SimpleForm>
             <TextInput source="title" required />
             <TextInput source="slug"  required/>
+            <TextInput source="link"/>
             <TextInput source="hero_title" required />
             <TextInput source="description" />
             <ImageInput source="hero_image" label="Hero Image" required />

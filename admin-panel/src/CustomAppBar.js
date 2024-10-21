@@ -24,7 +24,7 @@ const CustomAppBar = (props) => {
 
                 const fullLogoUrl = logo.value.startsWith('http')
                     ? logo.value // If already a full URL, use it
-                    : `${API_BASE_URL}${logo.value}`; // Prepend base URL
+                    : `${API_BASE_URL}/${logo.value}`; // Prepend base URL
 
                 setLogoUrl(fullLogoUrl);  // Set the full logo URL
             })

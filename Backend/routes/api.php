@@ -12,6 +12,8 @@ use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ServiceController;
 
+use App\Http\Controllers\ProductController;
+
 use App\Http\Controllers\PasswordResetController;
 
 Route::get('/storage/{path}', function ($path) {
@@ -31,7 +33,7 @@ Route::get('/storage/{path}', function ($path) {
 
 
 Route::get('/settings', [SettingController::class, 'index']);
-
+Route::get('/settings/{key}', [SettingController::class, 'settingByIdOrKey']);
 
 // Home Page About Us Section
 Route::get('/about-us/home', [AboutUsController::class, 'homePageAboutUs']);
@@ -72,6 +74,7 @@ Route::get('/partners', [PartnerController::class, 'index']);
 
 
 
+
 // Route for the Home page Contacting data (only 'src')
 Route::get('/contactings/home', [ContactingController::class, 'home']);
 
@@ -88,9 +91,22 @@ Route::get('/about-us/{aboutUsId}/brand-values', [AboutUsController::class, 'bra
 
 
 Route::get('/static/texts', [StaticController::class, 'index']);
-Route::get('/static/text/{id}', [StaticController::class, 'getText']);
+Route::get('/static/text/{key}', [StaticController::class, 'getText']);
 Route::get('/static/pages', [StaticController::class, 'pages']);
 Route::get('/static/page/{key}', [StaticController::class, 'pageByIdOrSlug']);
+
+
+
+Route::get('products', [ProductController::class, 'indexProducts']);
+Route::get('categories', [ProductController::class, 'indexCategories']);
+Route::get('subcategories', [ProductController::class, 'indexSubcategories']);
+
+// Get by ID
+Route::get('products/{id}', [ProductController::class, 'getProductById']);
+Route::get('categories/{id}', [ProductController::class, 'getCategoryById']);
+Route::get('subcategories/{id}', [ProductController::class, 'getSubcategoryById']);
+Route::get('categories/{id}/subcategories', [ProductController::class, 'getSubcategoriesByCategoryId']);
+// Create
 
 
 Route::middleware([IsAdmin::class])->group(function () {
@@ -166,6 +182,22 @@ Route::middleware([IsAdmin::class])->group(function () {
     Route::post('/admin/languages', [TranslationController::class, 'createLanguage']); // Create a new language
     Route::put('/admin/languages/{id}', [TranslationController::class, 'updateLanguage']); // Update an existing language
     Route::delete('/admin/languages/{id}', [TranslationController::class, 'deleteLanguage']); // Delete a language
+
+
+    Route::post('/admin/products', [ProductController::class, 'storeProduct']);
+    Route::post('/admin/categories', [ProductController::class, 'storeCategory']);
+    Route::post('/admin/categories/{categoryId}/subcategories', [ProductController::class, 'storeSubcategory']);
+
+
+    Route::put('/admin/products/{id}', [ProductController::class, 'updateProduct']);
+    Route::put('/admin/categories/{id}', [ProductController::class, 'updateCategory']);
+    Route::put('/admin/subcategories/{id}', [ProductController::class, 'updateSubcategory']);
+
+
+    Route::delete('/admin/products/{id}', [ProductController::class, 'destroyProduct']);
+    Route::delete('/admin/categories/{id}', [ProductController::class, 'destroyCategory']);
+    Route::delete('/admin/subcategories/{id}', [ProductController::class, 'destroySubcategory']);
+
 
     // Update user type
     Route::put('/admin/users/{id}/update-type', [AuthController::class, 'updateUserType']);

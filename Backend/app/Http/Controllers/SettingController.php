@@ -27,6 +27,36 @@ class SettingController extends Controller
         ]);
     }
 
+    public function settingByIdOrKey($key)
+    {
+        if (is_numeric($key)) {
+
+            $setting = Setting::findOrFail($key);
+
+        }
+
+        else  {
+
+
+            $setting = Setting::where('key', $key)->first();
+        }
+
+
+
+
+        if ($setting) {
+
+            $setting->value = translate($setting->value);
+            return response()->json($setting);
+
+        }
+
+        else {
+
+            return response("Not Found",404);
+        }
+    }
+
     // Create a new setting (POST)
     public function store(Request $request)
     {

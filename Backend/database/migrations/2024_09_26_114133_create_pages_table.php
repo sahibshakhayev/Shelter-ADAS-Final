@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('slug')->unique(); // e.g., 'about-us', 'contact', 'services'
             $table->string('title');
+            $table->string('link')->default("");
             $table->string('hero_image');
             $table->string('hero_title');
             $table->text('hero_description')->nullable();

@@ -41,18 +41,10 @@ class StaticController extends Controller
 
 
 
-    public function getText($id)
-    {
-        $data = StaticText::findOrFail($id);
-
-
-
-        return response()->json($data);
-    }
 
     public function pages()
     {
-        $data = Page::all('id','slug','title','is_active');
+        $data = Page::all('id','slug','title','link','is_active');
 
         foreach ($data as $page) {
 
@@ -105,7 +97,35 @@ class StaticController extends Controller
     }
 
 
+    public function getText($key)
+    {
+        if (is_numeric($key)) {
 
+            $sText = StaticText::findOrFail($key);
+
+        }
+
+        else  {
+
+
+            $sText = StaticText::where('key', $key)->first();
+        }
+
+
+
+
+        if ($sText) {
+
+            $sText->text = translate($sText->text);
+            return response()->json($sText);
+
+        }
+
+        else {
+
+            return response("Not Found",404);
+        }
+    }
 
 
     public function createPage(Request $request)
@@ -113,6 +133,7 @@ class StaticController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:pages',
+            'link' => 'required|string|max:255|unique:pages',
             'hero_title' => 'nullable|string|max:255',
             'hero_description' => 'nullable|string',
             'is_active' => 'boolean',
@@ -141,6 +162,7 @@ class StaticController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:pages,slug,' . $page->id,
+            'link' => 'required|string|max:255|unique:pages,link,' . $page->id,
             'hero_title' => 'nullable|string|max:255',
             'hero_description' => 'nullable|string',
             'is_active' => 'boolean',

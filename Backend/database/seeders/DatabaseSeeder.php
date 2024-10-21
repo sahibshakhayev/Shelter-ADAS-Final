@@ -25,10 +25,10 @@ class DatabaseSeeder extends Seeder
             ProjectsSeeder::class,
             ServicesSeeder::class,
             SettingsSeeder::class,
+            CategorySeeder::class,
             StaticTextsSeeder::class,
             TranslationsSeeder::class,
             UserSeeder::class,
-            // Add any other seeders here in the order you want them to run
         ]);
     }
 }
