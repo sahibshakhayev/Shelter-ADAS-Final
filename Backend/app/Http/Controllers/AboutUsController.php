@@ -42,6 +42,8 @@ class AboutUsController extends Controller
         }
         foreach ($aboutUs->brandValues as $brandValue) {
             $brandValue->icon = generateFullImageUrl($brandValue->icon);
+            $brandValue ->title = translate($brandValue->title);
+            $brandValue ->description = translate($brandValue->description);
         }
 
         $aboutUs->header_text = translate($aboutUs->header_text);
