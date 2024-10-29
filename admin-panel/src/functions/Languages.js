@@ -7,6 +7,7 @@ export const LanguageList = (props) => (
             <TextField source="id" />
             <TextField source="code" />
             <TextField source="name" />
+            <TextField source="country" />
             <EditButton />
             <DeleteButton />
         </Datagrid>
@@ -19,6 +20,7 @@ export const LanguageEdit = (props) => (
         <SimpleForm>
             <TextInput source="code" />
             <TextInput source="name" />
+            <TextInput source="country" />
         </SimpleForm>
     </Edit>
 );
@@ -29,6 +31,7 @@ export const LanguageCreate = (props) => (
         <SimpleForm>
             <TextInput source="code" required />
             <TextInput source="name" required/>
+            <TextInput source="country" required/>
         </SimpleForm>
     </Create>
 );

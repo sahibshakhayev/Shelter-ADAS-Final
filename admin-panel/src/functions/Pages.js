@@ -57,7 +57,7 @@ export const PageCreate = () => (
             <TextInput source="slug"  required/>
             <TextInput source="link"/>
             <TextInput source="hero_title" required />
-            <TextInput source="description" />
+            <TextInput source="hero_description" />
             <ImageInput source="hero_image" label="Hero Image" required />
             <BooleanInput source="is_active" />
         </SimpleForm>

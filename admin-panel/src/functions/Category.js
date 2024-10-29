@@ -1,6 +1,17 @@
 // functions/Category.js
 import * as React from 'react';
-import {List, Datagrid, TextField, EditButton, Edit, SimpleForm, TextInput, Create, DeleteButton} from 'react-admin';
+import {
+    List,
+    Datagrid,
+    TextField,
+    EditButton,
+    Edit,
+    SimpleForm,
+    TextInput,
+    Create,
+    DeleteButton,
+    ImageInput, ImageField
+} from 'react-admin';
 
 export const CategoryList = (props) => (
     <List {...props}>
@@ -17,6 +28,9 @@ export const CategoryEdit = (props) => (
     <Edit {...props}>
         <SimpleForm>
             <TextInput source="name" />
+            <ImageInput source="image" label="Category Image" accept="image/*">
+                <ImageField source="src" title="title" />
+            </ImageInput>
         </SimpleForm>
     </Edit>
 );
@@ -24,7 +38,10 @@ export const CategoryEdit = (props) => (
 export const CategoryCreate = (props) => (
     <Create {...props}>
         <SimpleForm>
-            <TextInput source="name" />
+            <TextInput source="name" required/>
+            <ImageInput source="image" label="Category Image" accept="image/*" required>
+                <ImageField source="src" title="title" />
+            </ImageInput>
         </SimpleForm>
     </Create>
 );

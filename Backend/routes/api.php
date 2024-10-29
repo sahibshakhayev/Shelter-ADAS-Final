@@ -103,6 +103,7 @@ Route::get('subcategories', [ProductController::class, 'indexSubcategories']);
 
 // Get by ID
 Route::get('products/{id}', [ProductController::class, 'getProductById']);
+Route::get('products/subcategory/{subCategoryId}', [ProductController::class, 'indexProductsbySubcategory']);
 Route::get('categories/{id}', [ProductController::class, 'getCategoryById']);
 Route::get('subcategories/{id}', [ProductController::class, 'getSubcategoryById']);
 Route::get('categories/{id}/subcategories', [ProductController::class, 'getSubcategoriesByCategoryId']);

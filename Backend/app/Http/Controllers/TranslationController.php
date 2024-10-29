@@ -101,7 +101,19 @@ class TranslationController extends Controller
     // Get all languages with pagination
     public function getLanguages(Request $request)
     {
-        $languages = Language::paginate(10); // Pagination with 10 items per page
+        if ($request ->query()) {
+
+            $languages = Language::paginate(10);
+
+        }
+
+        else {
+
+            $languages = Language::all();
+        }
+
+
+         // Pagination with 10 items per page
         return response()->json($languages);
     }
 
@@ -123,9 +135,12 @@ class TranslationController extends Controller
         $request->validate([
             'code' => 'required|string|max:2|unique:languages,code',
             'name' => 'required|string',
+            'country' => 'required|string',
         ]);
 
-        $language = Language::create($request->all());
+        $language = Language::create($request->except('country'));
+
+        $language -> update(['country' => mb_strtoupper($request->input('country'))]);
 
         return response()->json($language, 201); // Return 201 status for created
     }
@@ -142,9 +157,12 @@ class TranslationController extends Controller
         $request->validate([
             'code' => 'sometimes|required|string|max:2|unique:languages,code,' . $id,
             'name' => 'sometimes|required|string',
+            'country' => 'sometimes|required|string'
         ]);
 
-        $language->update($request->all());
+        $language->update($request->except('country'));
+
+        $language -> update(['country' => mb_strtoupper($request->input('country'))]);
 
         return response()->json($language);
     }

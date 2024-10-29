@@ -20,7 +20,8 @@ class ServiceController extends Controller
         // Translate fields
         $service->subtitle = translate($service->subtitle);
         $service->title = translate($service->title);
-        $service->content = translate($service->content);
+        $service['text-title'] = translate($service['text-title']);
+        $service->description= translate($service->description);
 
         return response()->json($service);
     }
@@ -157,11 +158,12 @@ class ServiceController extends Controller
             $service->src =generateFullImageUrl($service->src);
             $service->article_image = $service->article_image ? generateFullImageUrl($service->article_image) : null;
             $service->subtitle = translate($service->subtitle);
+            $service['text-title'] = translate($service['text-title']);
             $service->title = translate($service->title);
-            $service->content = translate($service->content);
+            $service->description = translate($service->description);
         }
 
-        return response()->json($services);
+        return response()->json(customPaginateResponse($services));
     }
 
 

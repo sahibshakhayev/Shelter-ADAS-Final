@@ -500,6 +500,7 @@ const myDataProvider = {
             formData.append('title', params.data.title);
             formData.append('slug', params.data['slug']);
             formData.append('hero_title', params.data.title);
+            formData.append('link', params.data.link);
             formData.append('hero_description', params.data['hero_description']);
             formData.append('is_active', Number(params.data['is_active']));
             formData.append('_method', 'PUT');
@@ -544,17 +545,57 @@ const myDataProvider = {
 
 
         if (resource === 'categories') {
+
+            const formData = new FormData();
+
+
+            formData.append('name', params.data.name);
+
+
+            // Handle image upload (if provided)
+            if (params.data['image'] && params.data['image'].rawFile) {
+                formData.append('image', params.data['image'].rawFile);
+            }
+
+
+            // Ensure it's an update request
+            formData.append('_method', 'PUT');
+
+
+
+
+
+
             return httpClient(`${apiUrl}/admin/categories/${params.id}`, {
-                method: 'PUT',
-                body: JSON.stringify(params.data),
+                method: 'POST',
+                body: formData,
             }).then(({ json }) => ({ data: json }));
         }
 
 
         if (resource === 'subcategories') {
+
+            const formData = new FormData();
+
+
+            formData.append('name', params.data.name);
+            formData.append('category_id', params.data['category_id']);
+
+            // Handle image upload (if provided)
+            if (params.data['image'] && params.data['image'].rawFile) {
+                formData.append('image', params.data['image'].rawFile);
+            }
+
+
+            // Ensure it's an update request
+            formData.append('_method', 'PUT');
+
+
+
+
             return httpClient(`${apiUrl}/admin/subcategories/${params.id}`, {
-                method: 'PUT',
-                body: JSON.stringify(params.data),
+                method: 'POST',
+                body: formData,
             }).then(({ json }) => ({ data: json }));
         }
 
@@ -856,7 +897,8 @@ const myDataProvider = {
             formData.append('title', params.data.title);
             formData.append('slug', params.data.slug);
             formData.append('hero_title', params.data.title);
-            formData.append('hero_description', params.data.hero_description);
+            formData.append('hero_description', params.data['hero_description']);
+            formData.append('link', params.data['link']);
             formData.append('is_active', Number(params.data['is_active']));
             if (params.data['hero_image'] && params.data['hero_image'].rawFile) {
                 formData.append('hero_image', params.data['hero_image'].rawFile); // Ensure the raw file is appended
@@ -883,17 +925,46 @@ const myDataProvider = {
 
 
         if (resource === 'categories') {
+
+            const formData = new FormData();
+
+
+            formData.append('name', params.data.name);
+
+
+            // Handle image upload (if provided)
+            if (params.data['image'] && params.data['image'].rawFile) {
+                formData.append('image', params.data['image'].rawFile);
+            }
+
+
+
             return httpClient(`${apiUrl}/admin/categories`, {
                 method: 'POST',
-                body: JSON.stringify(params.data),
+                body: formData,
             }).then(({ json }) => ({ data: json }));
         }
 
 
         if (resource === 'subcategories') {
+
+            const formData = new FormData();
+
+
+            formData.append('name', params.data.name);
+
+
+            // Handle image upload (if provided)
+            if (params.data['image'] && params.data['image'].rawFile) {
+                formData.append('image', params.data['image'].rawFile);
+            }
+
+
+
+
             return httpClient(`${apiUrl}/admin/categories/${params.data.category_id}/subcategories`, {
                 method: 'POST',
-                body: JSON.stringify(params.data),
+                body: formData,
             }).then(({ json }) => ({ data: json }));
         }
 

@@ -17,6 +17,11 @@ class SettingController extends Controller
 
            $setting->value = translate($setting->value);
 
+           if (str_contains($setting->key, 'logo')) {
+
+               $setting->value = generateFullImageUrl($setting->value);
+
+           }
 
          }
 

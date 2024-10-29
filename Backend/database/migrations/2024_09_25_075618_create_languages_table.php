@@ -13,6 +13,7 @@ return new class extends Migration
             $table->id();
             $table->string('code', 2);
             $table->string('name');
+            $table->string('country', 2)->nullable();
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Page;
 use App\Models\StaticText;
 use http\Env\Response;
@@ -49,6 +50,34 @@ class StaticController extends Controller
         foreach ($data as $page) {
 
             $page->title = translate($page->title);
+
+          if ($page->slug == 'products') {
+
+              $page->has_categories = true;
+
+              $page->categories = Category::all('id','name');
+
+
+              foreach ($page->categories as $category) {
+
+
+                  $category->link = '/'.str_replace(" ", "-", mb_strtolower($category->name));
+                  $category->name = translate($category->name);
+
+              }
+
+
+
+          }
+
+          else {
+
+              $page->has_categories = false;
+
+          }
+
+
+
         }
 
 
@@ -84,7 +113,7 @@ class StaticController extends Controller
 
             $page->title = translate($page->title);
             $page->hero_title = translate($page->hero_title);
-            $page->hero_description = translate($page->description);
+            $page->hero_description = translate($page->hero_description);
             $page->hero_image = generateFullImageUrl($page->hero_image);
             return response()->json($page);
 
@@ -160,9 +189,9 @@ class StaticController extends Controller
         $page = Page::findOrFail($id);
 
         $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:pages,slug,' . $page->id,
-            'link' => 'required|string|max:255|unique:pages,link,' . $page->id,
+            'title' => 'sometimes|string|max:255',
+            'slug' => 'sometimes|string|max:255|unique:pages,slug,' . $page->id,
+            'link' => 'sometimes|string|max:255|unique:pages,link,' . $page->id,
             'hero_title' => 'nullable|string|max:255',
             'hero_description' => 'nullable|string',
             'is_active' => 'boolean',

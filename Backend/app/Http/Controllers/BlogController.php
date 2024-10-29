@@ -33,7 +33,7 @@ class BlogController extends Controller
             $blog->content = translate($blog->content);
         }
 
-        return response()->json($blogs);
+        return response()->json(customPaginateResponse($blogs));
     }
 
     // Method to get a single blog by ID
