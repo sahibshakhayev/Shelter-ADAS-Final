@@ -499,7 +499,7 @@ const myDataProvider = {
             const formData = new FormData();
             formData.append('title', params.data.title);
             formData.append('slug', params.data['slug']);
-            formData.append('hero_title', params.data.title);
+            formData.append('hero_title', params.data['hero_title']);
             formData.append('link', params.data.link);
             formData.append('hero_description', params.data['hero_description']);
             formData.append('is_active', Number(params.data['is_active']));
@@ -896,7 +896,7 @@ const myDataProvider = {
             const formData = new FormData();
             formData.append('title', params.data.title);
             formData.append('slug', params.data.slug);
-            formData.append('hero_title', params.data.title);
+            formData.append('hero_title', params.data['hero_title']);
             formData.append('hero_description', params.data['hero_description']);
             formData.append('link', params.data['link']);
             formData.append('is_active', Number(params.data['is_active']));

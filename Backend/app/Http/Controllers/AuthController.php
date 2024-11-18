@@ -59,6 +59,11 @@ class AuthController extends Controller
         $accessExpire = JWTAuth::factory()->getTTL();
         $refreshExpire = config('jwt.refresh_ttl');
 
+
+        $payload = JWTAuth::setToken($accessToken)->getPayload();
+        logger('LOGIN - Access Token Issued At: ' . $payload['iat']);
+        logger('LOGIN - Access Token Expires At: ' . $payload['exp']);
+
         return response()->json([
             'user_id' => $user->id,
             'user_name' => $user->name,
@@ -68,6 +73,8 @@ class AuthController extends Controller
             'access_expire' => $accessExpire,
             'refresh_expire' => $refreshExpire,
         ]);
+
+
     }
 
     public function me(Request $request)
@@ -78,25 +85,60 @@ class AuthController extends Controller
 
 
 
-    public function refreshToken()
+    public function refreshToken(Request $request)
     {
         try {
-            $newToken = JWTAuth::refresh(JWTAuth::getToken());
-            $user = Auth::user();
-            $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser($user);
-            $accessExpire = JWTAuth::factory()->getTTL();
-            $refreshExpire = config('jwt.refresh_ttl');
+            // Get the current refresh token
+            $refreshToken = $request->header('Authorization') ?: $request->input('refresh_token');
 
+            // Strip "Bearer " prefix if it exists
+            if (str_starts_with($refreshToken, 'Bearer ')) {
+                $refreshToken = substr($refreshToken, 7);
+            }
+
+
+            if (!$refreshToken) {
+
+
+                return response()->json(['error' => 'refresh_token or Bearer Authorization header with refresh token must be defined'], 400);
+
+            }
+
+            // Refresh the access token
+            $newAccessToken = JWTAuth::setToken($refreshToken)->refresh();
+
+            // Get the user for generating tokens
+            $user = JWTAuth::setToken($newAccessToken)->toUser();
+            $accessExpire = JWTAuth::factory()->getTTL(); // Access token TTL in minutes
+            $refreshExpire = config('jwt.refresh_ttl');   // Refresh token TTL from config
+
+            // Check if refresh token has expired
+            $currentPayload = JWTAuth::setToken($refreshToken)->getPayload();
+            $currentRefreshExpiry = $currentPayload['exp'];
+            $currentTime = now()->timestamp;
+
+
+            // Return the new access token and the new refresh token only if issued
             return response()->json([
-                'access_token' => $newToken,
-                'refresh_token' => $refreshToken,
+                'access_token' => $newAccessToken,
                 'access_expire' => $accessExpire,
+                'refresh_token' => $refreshToken,
                 'refresh_expire' => $refreshExpire,
             ]);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Could not refresh token'], 500);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return response()->json(['error' => 'Token has expired and cannot be refreshed. Please log in again.'], 401);
+        }
+        catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json(['error' => 'Invalid Refresh Token'], 401);
+        }
+
+        catch (JWTException $e) {
+            return response()->json(['error' => 'Could not refresh token.'], 500);
         }
     }
+
+
+
 
     public function logout()
     {

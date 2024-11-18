@@ -41,6 +41,10 @@ class BlogController extends Controller
     {
         $blog = Blog::findOrFail($id);
 
+
+        $blog->title = translate($blog->title);
+        $blog->subtitle = translate($blog->subtitle);
+        $blog->content = translate($blog->content);
         $blog->image = generateFullImageUrl($blog->image);
         $blog->article_image = $blog->article_image ? generateFullImageUrl($blog->article_image) : null;
 

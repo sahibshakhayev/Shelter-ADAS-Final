@@ -1,5 +1,4 @@
 import axios from 'axios';
-import jwtDecode from 'jwt-decode';  // You'll need to install this package to decode JWT tokens
 import { API_BASE_URL } from "./config";
 
 const authProvider = {
@@ -8,14 +7,14 @@ const authProvider = {
         try {
             const { data } = await axios.post(`${API_BASE_URL}/api/login`, { email, password });
 
-            // Get the current time in seconds
+            // Get current time in seconds
             const currentTime = Math.floor(Date.now() / 1000);
 
-            // Calculate access and refresh token expiry times in seconds
-            const accessTokenExpiry = currentTime + data.access_expire * 60; // access_expire is in minutes
-            const refreshTokenExpiry = currentTime + data.refresh_expire * 60; // refresh_expire is in minutes
+            // Calculate expiry times for tokens in seconds
+            const accessTokenExpiry = currentTime + data.access_expire * 60; // from minutes to seconds
+            const refreshTokenExpiry = currentTime + data.refresh_expire * 60; // from minutes to seconds
 
-            // Store tokens and expiration times in localStorage
+            // Store tokens and expiry times in localStorage
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('refresh_token', data.refresh_token);
             localStorage.setItem('permissions', data.user_type);
@@ -38,45 +37,45 @@ const authProvider = {
         return Promise.resolve();
     },
 
-    // Check if user is authenticated by checking the access token
+    // Check if the user is authenticated by checking the access token
     checkAuth: async () => {
-        const token = localStorage.getItem('access_token');
-        const accessTokenExpiry = localStorage.getItem('access_token_expiry');
+        const accessToken = localStorage.getItem('access_token');
+        const accessTokenExpiry = parseInt(localStorage.getItem('access_token_expiry'), 10);
+        const refreshTokenExpiry = parseInt(localStorage.getItem('refresh_token_expiry'), 10);
         const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
 
-        if (token && accessTokenExpiry) {
-            // Check if the access token has expired
+        if (accessToken && accessTokenExpiry) {
             if (currentTime >= accessTokenExpiry) {
-                // Access token has expired, try refreshing it
+                // Access token expired; attempt to refresh
                 return authProvider.refreshToken()
                     .then(() => Promise.resolve())
-                    .catch(() => Promise.reject());
+                    .catch(() => Promise.reject('Session expired. Please log in again.'));
             }
 
-            // Optionally, ping a protected endpoint to ensure the token is valid
+            // If access token is still valid, optionally ping a protected endpoint
             try {
                 await axios.get(`${API_BASE_URL}/api/me`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                    headers: { Authorization: `Bearer ${accessToken}` }, // Include Bearer prefix
                 });
                 return Promise.resolve();
             } catch (error) {
+                // If unauthorized, try refreshing the token
                 if (error.response?.status === 401) {
-                    // If unauthorized, try refreshing the token
                     return authProvider.refreshToken()
                         .then(() => Promise.resolve())
-                        .catch(() => Promise.reject());
+                        .catch(() => Promise.reject('Session expired. Please log in again.'));
                 }
             }
         }
-        return Promise.reject(); // No valid token
+
+        return Promise.reject('No valid token');
     },
 
     // Handle errors such as 401 or 403
     checkError: (error) => {
         const status = error.status || error.response?.status;
         if (status === 401 || status === 403) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
+            authProvider.logout();
             return Promise.reject();
         }
         return Promise.resolve();
@@ -90,21 +89,25 @@ const authProvider = {
     // Refresh the access token using the refresh token
     refreshToken: async () => {
         const refreshToken = localStorage.getItem('refresh_token');
-        if (!refreshToken) return Promise.reject('No refresh token available');
+        const refreshTokenExpiry = parseInt(localStorage.getItem('refresh_token_expiry'), 10);
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        // Check if the refresh token is still valid
+        if (!refreshToken || currentTime >= refreshTokenExpiry) {
+            authProvider.logout();
+            return Promise.reject('Refresh token expired. Please log in again.');
+        }
 
         try {
             const { data } = await axios.post(`${API_BASE_URL}/api/refresh`, {}, {
-                headers: { Authorization: `Bearer ${refreshToken}` },
+                headers: { Authorization: `Bearer ${refreshToken}` }, // Include Bearer prefix
             });
 
-            // Get the current time in seconds
-            const currentTime = Math.floor(Date.now() / 1000);
-
-            // Calculate new expiration times for tokens
+            // Calculate new expiry times
             const newAccessTokenExpiry = currentTime + data.access_expire * 60;
             const newRefreshTokenExpiry = currentTime + data.refresh_expire * 60;
 
-            // Store new tokens and expiration times in localStorage
+            // Store new tokens and expiry times in localStorage
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('refresh_token', data.refresh_token);
             localStorage.setItem('access_token_expiry', newAccessTokenExpiry);
@@ -112,6 +115,7 @@ const authProvider = {
 
             return Promise.resolve();
         } catch (error) {
+            authProvider.logout();
             return Promise.reject('Failed to refresh token');
         }
     },
