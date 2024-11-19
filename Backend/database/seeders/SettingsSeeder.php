@@ -10,6 +10,8 @@ class SettingsSeeder extends Seeder
 {
     public function run()
     {
+
+
         DB::table('settings')->insert([
             [
                 'key' => 'site_name',

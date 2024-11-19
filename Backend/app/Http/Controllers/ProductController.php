@@ -114,7 +114,8 @@ class ProductController extends Controller
         $product->description = translate($product->description);
         $product->location = translate($product->location);
         $product->client = translate($product->client);
-        $product->image = generateFullImageUrl($product->image);
+        $product->image = generateFullImageUrl($product->image);$product->subcategory->name = translate($product->subcategory->name);
+        $product->subcategory->category->name = translate($product->subcategory->category->name);
         return response()->json($product);
     }
 

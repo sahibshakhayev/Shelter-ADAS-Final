@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\FindWays;
 use App\Models\Page;
 use App\Models\StaticText;
 use http\Env\Response;
@@ -90,6 +91,32 @@ class StaticController extends Controller
     }
 
 
+
+    public function findWaysIndex(){
+
+        $data = FindWays::query();
+
+
+        $data = $data->get();
+
+
+        foreach ($data as $findway) {
+
+            $findway->value = translate($findway->value);
+
+
+        }
+
+
+        return response()->json([
+            'data' => $data,
+            'total' => $data->count()
+        ]);
+
+
+
+
+    }
 
 
     public function pageByIdOrSlug($key)
