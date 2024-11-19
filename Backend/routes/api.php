@@ -94,7 +94,7 @@ Route::get('/static/texts', [StaticController::class, 'index']);
 Route::get('/static/text/{key}', [StaticController::class, 'getText']);
 Route::get('/static/pages', [StaticController::class, 'pages']);
 Route::get('/static/page/{key}', [StaticController::class, 'pageByIdOrSlug']);
-
+Route::get('/static/findways', [StaticController::class, 'findWaysIndex']);
 
 
 Route::get('products', [ProductController::class, 'indexProducts']);
