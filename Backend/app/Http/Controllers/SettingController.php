@@ -10,6 +10,7 @@ class SettingController extends Controller
 {
     public function index()
     {
+
         $settings = Setting::all();
 
         // Convert the key-value pairs to an array of objects
@@ -24,12 +25,13 @@ class SettingController extends Controller
            }
 
          }
-
-        // Return the data in the format React Admin expects
         return response()->json([
             'data' => $settings, // Return as an array of objects
             'total' => count($settings) // Return the total count of settings
         ]);
+
+
+
     }
 
     public function settingByIdOrKey($key)

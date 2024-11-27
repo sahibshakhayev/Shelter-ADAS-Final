@@ -22,8 +22,8 @@ class ProductController extends Controller
             ->select('products.*', 'subcategories.name as subcategory_name', 'subcategories.category_id', 'categories.name as category_name');
 
         // Apply search filter
-        if ($request->has('q')) {
-            $search = $request->input('q');
+        if ($request->has('search')) {
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('products.title', 'like', '%' . $search . '%')
                     ->orWhere('products.description', 'like', '%' . $search . '%');
@@ -114,7 +114,8 @@ class ProductController extends Controller
         $product->description = translate($product->description);
         $product->location = translate($product->location);
         $product->client = translate($product->client);
-        $product->image = generateFullImageUrl($product->image);
+        $product->image = generateFullImageUrl($product->image);$product->subcategory->name = translate($product->subcategory->name);
+        $product->subcategory->category->name = translate($product->subcategory->category->name);
         return response()->json($product);
     }
 

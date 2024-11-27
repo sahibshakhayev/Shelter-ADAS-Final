@@ -16,18 +16,7 @@ use App\Http\Controllers\ProductController;
 
 use App\Http\Controllers\PasswordResetController;
 
-Route::get('/storage/{path}', function ($path) {
-    // Define the full path including subdirectories
-    $fullPath = public_path($path);
 
-    // Check if the file exists
-    if (!file_exists($fullPath)) {
-        abort(404);
-    }
-
-    // Return the file as a response
-    return Response::download($fullPath);
-})->where('path', '.*');
 
 
 
@@ -55,7 +44,10 @@ Route::get('translations', [TranslationController::class, 'getTranslations']); /
 Route::get('translations/{id}', [TranslationController::class, 'getTranslation']); // Get translation by ID
 
 
+Route::get('/version', function () {
+    return response('OK', 200, ['Content-Length' => strlen('OK')]);
 
+});
 
 
 
@@ -94,7 +86,7 @@ Route::get('/static/texts', [StaticController::class, 'index']);
 Route::get('/static/text/{key}', [StaticController::class, 'getText']);
 Route::get('/static/pages', [StaticController::class, 'pages']);
 Route::get('/static/page/{key}', [StaticController::class, 'pageByIdOrSlug']);
-
+Route::get('/static/findways', [StaticController::class, 'findWaysIndex']);
 
 
 Route::get('products', [ProductController::class, 'indexProducts']);
