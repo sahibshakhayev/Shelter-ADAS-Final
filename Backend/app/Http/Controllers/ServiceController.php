@@ -152,7 +152,7 @@ class ServiceController extends Controller
                 ->orWhere('description', 'like', "%{$search}%");
         }
 
-        $services = $query->paginate(4);
+        $services = $query->paginate(10);
 
         foreach ($services as $service) {
             $service->src =generateFullImageUrl($service->src);
